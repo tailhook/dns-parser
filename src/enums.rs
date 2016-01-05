@@ -77,7 +77,7 @@ pub enum QueryType {
     /// service record (RFC 2782)
     SRV = 33,
     /// A request for a transfer of an entire zone
-    AXFR = 252
+    AXFR = 252,
     /// A request for mailbox-related records (MB, MG or MR)
     MAILB = 253,
     /// A request for mail agent RRs (Obsolete - see MX)
@@ -113,4 +113,14 @@ pub enum QueryClass {
     HS = 4,
     /// Any class
     Any = 255,
+}
+
+/// The RCODE value according to RFC 1035
+pub enum ResponseCode {
+    NoError = 0,
+    FormatError = 1,
+    ServerFailure = 2,
+    NameError = 3,
+    NotImplemented = 4,
+    Refused = 5,
 }
