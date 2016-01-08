@@ -1,5 +1,5 @@
 use std::net::Ipv4Addr;
-use {QueryType, QueryClass, ResponseCode, Name, Type, Class};
+use {QueryType, QueryClass, ResponseCode, Name, Type, Class, Opcode};
 
 pub enum RRData<'a> {
     CNAME(Name<'a>),
@@ -10,16 +10,18 @@ pub enum RRData<'a> {
 }
 
 pub struct RawMessage<'a> {
-    pub header: &'a [u8],
+    pub header: Header,
     pub question: &'a [u8],
     pub answer: &'a [u8],
     pub authority: &'a [u8],
     pub additional: &'a [u8],
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct Header {
     pub id: u16,
     pub query: bool,
+    pub opcode: Opcode,
     pub authoritative: bool,
     pub truncated: bool,
     pub recursion_desired: bool,

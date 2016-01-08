@@ -1,6 +1,9 @@
+use {Error};
+
 /// The TYPE value according to RFC 1035
 ///
 /// All "EXPERIMENTAL" markers here are from the RFC
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Type {
     /// a host addresss
     A = 1,
@@ -41,6 +44,7 @@ pub enum Type {
 /// The QTYPE value according to RFC 1035
 ///
 /// All "EXPERIMENTAL" markers here are from the RFC
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum QueryType {
     /// a host addresss
     A = 1,
@@ -88,6 +92,7 @@ pub enum QueryType {
 
 
 /// The CLASS value according to RFC 1035
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Class {
     /// the Internet
     IN = 1,
@@ -101,6 +106,7 @@ pub enum Class {
 }
 
 /// The QCLASS value according to RFC 1035
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum QueryClass {
     /// the Internet
     IN = 1,
@@ -115,7 +121,16 @@ pub enum QueryClass {
     Any = 255,
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum Opcode {
+    StandardQuery,
+    InverseQuery,
+    ServerStatusRequest,
+    Reserved(u16),
+}
+
 /// The RCODE value according to RFC 1035
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ResponseCode {
     NoError = 0,
     FormatError = 1,
@@ -123,4 +138,31 @@ pub enum ResponseCode {
     NameError = 3,
     NotImplemented = 4,
     Refused = 5,
+}
+
+impl From<u16> for Opcode {
+    fn from(code: u16) -> Opcode {
+        use self::Opcode::*;
+        match code {
+            0 => StandardQuery,
+            1 => InverseQuery,
+            2 => ServerStatusRequest,
+            x => Reserved(x),
+        }
+    }
+}
+
+impl ResponseCode {
+    pub fn parse(code: u16) -> Result<ResponseCode, Error> {
+        use self::ResponseCode::*;
+        match code {
+            0 => Ok(NoError),
+            1 => Ok(FormatError),
+            2 => Ok(ServerFailure),
+            3 => Ok(NameError),
+            4 => Ok(NotImplemented),
+            5 => Ok(Refused),
+            x => Err(Error::InvalidResponseCode(x)),
+        }
+    }
 }
