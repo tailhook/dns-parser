@@ -6,9 +6,11 @@ mod structs;
 mod name;
 mod parser;
 mod error;
+mod header;
 
 pub use enums::{Type, QueryType, Class, QueryClass, ResponseCode, Opcode};
-pub use structs::{RawMessage, Header, Question, ResourceRecord};
+pub use structs::{Question, ResourceRecord};
 pub use name::{Name};
 pub use error::{Error};
+pub use header::{Header};
 
