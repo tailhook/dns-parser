@@ -1,5 +1,6 @@
 extern crate byteorder;
-#[macro_use] extern crate quick_error;
+#[macro_use(matches)] extern crate matches;
+#[macro_use(quick_error)] extern crate quick_error;
 
 mod enums;
 mod structs;
@@ -9,7 +10,7 @@ mod error;
 mod header;
 
 pub use enums::{Type, QueryType, Class, QueryClass, ResponseCode, Opcode};
-pub use structs::{Question, ResourceRecord};
+pub use structs::{Question, ResourceRecord, Packet};
 pub use name::{Name};
 pub use error::{Error};
 pub use header::{Header};

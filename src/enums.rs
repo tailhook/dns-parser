@@ -39,6 +39,8 @@ pub enum Type {
     AAAA = 28,
     /// service record (RFC 2782)
     SRV = 33,
+    /// EDNS0 options (RFC 6891)
+    OPT = 41,
 }
 
 /// The QTYPE value according to RFC 1035
@@ -163,6 +165,50 @@ impl ResponseCode {
             4 => Ok(NotImplemented),
             5 => Ok(Refused),
             x => Err(Error::InvalidResponseCode(x)),
+        }
+    }
+}
+
+impl QueryType {
+    pub fn parse(code: u16) -> Result<QueryType, Error> {
+        use self::QueryType::*;
+        match code {
+            1   => Ok(A),
+            2   => Ok(NS),
+            4   => Ok(MF),
+            5   => Ok(CNAME),
+            6   => Ok(SOA),
+            7   => Ok(MB),
+            8   => Ok(MG),
+            9   => Ok(MR),
+            10  => Ok(NULL),
+            11  => Ok(WKS),
+            12  => Ok(PTR),
+            13  => Ok(HINFO),
+            14  => Ok(MINFO),
+            15  => Ok(MX),
+            16  => Ok(TXT),
+            28  => Ok(AAAA),
+            33  => Ok(SRV),
+            252 => Ok(AXFR),
+            253 => Ok(MAILB),
+            254 => Ok(MAILA),
+            255 => Ok(All),
+            x => Err(Error::InvalidQueryType(x)),
+        }
+    }
+}
+
+impl QueryClass {
+    pub fn parse(code: u16) -> Result<QueryClass, Error> {
+        use self::QueryClass::*;
+        match code {
+            1   => Ok(IN),
+            2   => Ok(CS),
+            3   => Ok(CH),
+            4   => Ok(HS),
+            255 => Ok(Any),
+            x => Err(Error::InvalidQueryClass(x)),
         }
     }
 }

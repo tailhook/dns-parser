@@ -13,7 +13,7 @@ mod flag {
     pub const RESPONSE_CODE_MASK:  u16 = 0b0000_0000_0000_1111;
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Header {
     pub id: u16,
     pub query: bool,
@@ -30,7 +30,7 @@ pub struct Header {
 }
 
 impl Header {
-    pub fn parse(data: &[u8]) -> Result<(Header, &[u8]), Error> {
+    pub fn parse(data: &[u8]) -> Result<Header, Error> {
         if data.len() < 12 {
             return Err(Error::HeaderTooShort);
         }
@@ -54,8 +54,9 @@ impl Header {
             nameservers: BigEndian::read_u16(&data[8..10]),
             additional: BigEndian::read_u16(&data[10..12]),
         };
-        Ok((header, &data[12..]))
+        Ok(header)
     }
+    pub fn size() -> usize { 12 }
 }
 
 
@@ -71,7 +72,7 @@ mod test {
         let query = b"\x06%\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\
                       \x07example\x03com\x00\x00\x01\x00\x01";
         let header = Header::parse(query).unwrap();
-        assert_eq!(header.0, Header {
+        assert_eq!(header, Header {
             id: 1573,
             query: true,
             opcode: StandardQuery,
@@ -86,6 +87,7 @@ mod test {
             additional: 0,
         });
     }
+
     #[test]
     fn parse_example_response() {
         let response = b"\x06%\x81\x80\x00\x01\x00\x01\x00\x00\x00\x00\
@@ -93,7 +95,7 @@ mod test {
                          \xc0\x0c\x00\x01\x00\x01\x00\x00\x04\xf8\
                          \x00\x04]\xb8\xd8\"";
         let header = Header::parse(response).unwrap();
-        assert_eq!(header.0, Header {
+        assert_eq!(header, Header {
             id: 1573,
             query: false,
             opcode: StandardQuery,
