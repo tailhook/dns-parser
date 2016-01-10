@@ -10,7 +10,6 @@ impl<'a> Packet<'a> {
         let mut questions = Vec::new();
         for _ in 0..header.questions {
             let name = try!(Name::scan(&data[offset..], data));
-            println!("NAME {:?}", name);
             offset += name.byte_len();
             let qtype = try!(QueryType::parse(
                 BigEndian::read_u16(&data[offset..offset+2])));
