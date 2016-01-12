@@ -24,7 +24,7 @@ impl<'a> Name<'a> {
             }
             let byte = data[pos];
             if byte == 0 {
-                return Ok(Name { labels: &data[..pos+1], original: data });
+                return Ok(Name { labels: &data[..pos+1], original: original });
             } else if byte & 0b1100_0000 == 0b1100_0000 {
                 if data.len() < pos+2 {
                     return Err(Error::UnexpectedEOF);
@@ -36,7 +36,7 @@ impl<'a> Name<'a> {
                 }
                 // Validate referred to location
                 try!(Name::scan(&original[off..], original));
-                return Ok(Name { labels: &data[..pos+2], original: data });
+                return Ok(Name { labels: &data[..pos+2], original: original });
             } else if byte & 0b1100_0000 == 0 {
                 let end = pos + byte as usize + 1;
                 if !data[pos+1..end].is_ascii() {

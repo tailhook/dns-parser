@@ -7,6 +7,9 @@ quick_error! {
         UnexpectedEOF {
             description("packet is has incomplete data")
         }
+        WrongRdataLength {
+            description("wrong (too short or too long) size of RDATA")
+        }
         ReservedBitsAreNonZero {
             description("packet has non-zero reserved bits")
         }
@@ -24,6 +27,14 @@ quick_error! {
         InvalidQueryClass(code: u16) {
             description("query class code is invalid")
             display("query class {} is invalid", code)
+        }
+        InvalidType(code: u16) {
+            description("type code is invalid")
+            display("type {} is invalid", code)
+        }
+        InvalidClass(code: u16) {
+            description("class code is invalid")
+            display("class {} is invalid", code)
         }
         LabelIsNotAscii {
             description("invalid characters encountered while reading label")
