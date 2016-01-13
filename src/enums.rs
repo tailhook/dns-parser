@@ -123,6 +123,7 @@ pub enum QueryClass {
     Any = 255,
 }
 
+/// The OPCODE value according to RFC 1035
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Opcode {
     StandardQuery,

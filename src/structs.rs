@@ -1,6 +1,7 @@
 use {QueryType, QueryClass, Name, Class, Header, RRData};
 
 
+/// Parsed DNS packet
 pub struct Packet<'a> {
     pub header: Header,
     pub questions: Vec<Question<'a>>,
@@ -9,12 +10,18 @@ pub struct Packet<'a> {
     pub additional: Vec<ResourceRecord<'a>>,
 }
 
+/// A parsed chunk of data in the Query section of the packet
 pub struct Question<'a> {
     pub qname: Name<'a>,
     pub qtype: QueryType,
     pub qclass: QueryClass,
 }
 
+/// A single DNS record
+///
+/// We aim to provide whole range of DNS records available. But as time is
+/// limited we have some types of packets which are parsed and other provided
+/// as unparsed slice of bytes.
 pub struct ResourceRecord<'a> {
     pub name: Name<'a>,
     pub cls: Class,

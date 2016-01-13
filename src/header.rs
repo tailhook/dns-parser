@@ -13,6 +13,7 @@ mod flag {
     pub const RESPONSE_CODE_MASK:  u16 = 0b0000_0000_0000_1111;
 }
 
+/// Represents parsed header of the packet
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Header {
     pub id: u16,

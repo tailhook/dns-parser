@@ -1,4 +1,5 @@
 quick_error! {
+    /// Error parsing DNS packet
     #[derive(Debug)]
     pub enum Error {
         HeaderTooShort {
