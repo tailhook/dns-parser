@@ -4,7 +4,7 @@ description = """
     Pure-rust DNS protocol parser library. This does not support network, only
     raw protocol parser.
 """
-license = "MIT"
+license = "MIT/Apache-2.0"
 readme = "README.rst"
 keywords = ["dns", "domain", "name", "parser"]
 homepage = "http://github.com/tailhook/dns-parser"
