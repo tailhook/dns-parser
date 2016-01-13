@@ -2,14 +2,14 @@ use byteorder::{ByteOrder, BigEndian, WriteBytesExt};
 
 use {Opcode, ResponseCode, Header, QueryType, QueryClass};
 
-pub struct Builder {
-    buf: Vec<u8>,
-}
-
 /// Allows to build a DNS packet
 ///
 /// Both query and answer packets may be built with this interface, although,
 /// much of functionality is not implemented yet.
+pub struct Builder {
+    buf: Vec<u8>,
+}
+
 impl Builder {
     /// Creates a new query
     ///
