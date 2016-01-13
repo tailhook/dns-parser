@@ -9,6 +9,7 @@ mod parser;
 mod error;
 mod header;
 mod rrdata;
+mod builder;
 
 pub use enums::{Type, QueryType, Class, QueryClass, ResponseCode, Opcode};
 pub use structs::{Question, ResourceRecord, Packet};
@@ -16,4 +17,5 @@ pub use name::{Name};
 pub use error::{Error};
 pub use header::{Header};
 pub use rrdata::{RRData};
+pub use builder::{Builder};
 

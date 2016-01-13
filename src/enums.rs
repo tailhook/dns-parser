@@ -153,6 +153,17 @@ impl From<u16> for Opcode {
         }
     }
 }
+impl Into<u16> for Opcode {
+    fn into(self) -> u16 {
+        use self::Opcode::*;
+        match self {
+            StandardQuery => 0,
+            InverseQuery => 1,
+            ServerStatusRequest => 2,
+            Reserved(x) => x,
+        }
+    }
+}
 
 impl ResponseCode {
     pub fn parse(code: u16) -> Result<ResponseCode, Error> {

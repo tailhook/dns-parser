@@ -56,6 +56,35 @@ impl Header {
         };
         Ok(header)
     }
+    /// Write a header to a buffer slice
+    ///
+    /// # Panics
+    ///
+    /// When buffer size is not exactly 12 bytes
+    pub fn write(&self, data: &mut [u8]) {
+        if data.len() != 12 {
+            panic!("Header size is exactly 12 bytes");
+        }
+        let mut flags = 0u16;
+        flags |= Into::<u16>::into(self.opcode)
+            << flag::OPCODE_MASK.trailing_zeros();
+        flags |= self.response_code as u16;
+        if !self.query { flags |= flag::QUERY; }
+        if self.authoritative { flags |= flag::AUTHORITATIVE; }
+        if self.recursion_desired { flags |= flag::RECURSION_DESIRED; }
+        if self.recursion_available { flags |= flag::RECURSION_AVAILABLE; }
+        if self.truncated { flags |= flag::TRUNCATED; }
+        BigEndian::write_u16(&mut data[..2], self.id);
+        BigEndian::write_u16(&mut data[2..4], flags);
+        BigEndian::write_u16(&mut data[4..6], self.questions);
+        BigEndian::write_u16(&mut data[6..8], self.answers);
+        BigEndian::write_u16(&mut data[8..10], self.nameservers);
+        BigEndian::write_u16(&mut data[10..12], self.additional);
+    }
+    pub fn set_truncated(data: &mut [u8]) {
+        let oldflags = BigEndian::read_u16(&data[2..4]);
+        BigEndian::write_u16(&mut data[2..4], oldflags & flag::TRUNCATED);
+    }
     pub fn size() -> usize { 12 }
 }
 
