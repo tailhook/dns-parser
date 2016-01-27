@@ -135,12 +135,13 @@ pub enum Opcode {
 /// The RCODE value according to RFC 1035
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ResponseCode {
-    NoError = 0,
-    FormatError = 1,
-    ServerFailure = 2,
-    NameError = 3,
-    NotImplemented = 4,
-    Refused = 5,
+    NoError,
+    FormatError,
+    ServerFailure,
+    NameError,
+    NotImplemented,
+    Refused,
+    Reserved(u8),
 }
 
 impl From<u16> for Opcode {
@@ -166,17 +167,32 @@ impl Into<u16> for Opcode {
     }
 }
 
-impl ResponseCode {
-    pub fn parse(code: u16) -> Result<ResponseCode, Error> {
+impl From<u8> for ResponseCode {
+    fn from(code: u8) -> ResponseCode {
         use self::ResponseCode::*;
         match code {
-            0 => Ok(NoError),
-            1 => Ok(FormatError),
-            2 => Ok(ServerFailure),
-            3 => Ok(NameError),
-            4 => Ok(NotImplemented),
-            5 => Ok(Refused),
-            x => Err(Error::InvalidResponseCode(x)),
+            0      => NoError,
+            1      => FormatError,
+            2      => ServerFailure,
+            3      => NameError,
+            4      => NotImplemented,
+            5      => Refused,
+            6...15 => Reserved(code),
+            x => panic!("Invalid response code {}", x),
+        }
+    }
+}
+impl Into<u8> for ResponseCode {
+    fn into(self) -> u8 {
+        use self::ResponseCode::*;
+        match self {
+            NoError => 0,
+            FormatError => 1,
+            ServerFailure => 2,
+            NameError => 3,
+            NotImplemented => 4,
+            Refused => 5,
+            Reserved(code) => code,
         }
     }
 }

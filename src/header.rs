@@ -48,8 +48,7 @@ impl Header {
             truncated: flags & flag::TRUNCATED != 0,
             recursion_desired: flags & flag::RECURSION_DESIRED != 0,
             recursion_available: flags & flag::RECURSION_AVAILABLE != 0,
-            response_code: try!(ResponseCode::parse(
-                flags & flag::RESPONSE_CODE_MASK)),
+            response_code: From::from((flags&flag::RESPONSE_CODE_MASK) as u8),
             questions: BigEndian::read_u16(&data[4..6]),
             answers: BigEndian::read_u16(&data[6..8]),
             nameservers: BigEndian::read_u16(&data[8..10]),
@@ -69,7 +68,7 @@ impl Header {
         let mut flags = 0u16;
         flags |= Into::<u16>::into(self.opcode)
             << flag::OPCODE_MASK.trailing_zeros();
-        flags |= self.response_code as u16;
+        flags |= Into::<u8>::into(self.response_code) as u16;
         if !self.query { flags |= flag::QUERY; }
         if self.authoritative { flags |= flag::AUTHORITATIVE; }
         if self.recursion_desired { flags |= flag::RECURSION_DESIRED; }
@@ -95,7 +94,7 @@ mod test {
 
     use {Header};
     use Opcode::*;
-    use ResponseCode::*;
+    use ResponseCode::NoError;
 
     #[test]
     fn parse_example_query() {

@@ -72,7 +72,7 @@ mod test {
     use std::net::Ipv4Addr;
     use {Packet, Header};
     use Opcode::*;
-    use ResponseCode::*;
+    use ResponseCode::NoError;
     use QueryType as QT;
     use QueryClass as QC;
     use Class as C;

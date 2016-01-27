@@ -17,10 +17,6 @@ quick_error! {
         UnknownLabelFormat {
             description("label in domain name has unknown label format")
         }
-        InvalidResponseCode(code: u16) {
-            description("response code is invalid")
-            display("response code {} is invalid", code)
-        }
         InvalidQueryType(code: u16) {
             description("query type code is invalid")
             display("query type {} is invalid", code)
