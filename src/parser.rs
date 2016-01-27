@@ -8,7 +8,7 @@ impl<'a> Packet<'a> {
     pub fn parse(data: &[u8]) -> Result<Packet, Error> {
         let header = try!(Header::parse(data));
         let mut offset = Header::size();
-        let mut questions = Vec::new();
+        let mut questions = Vec::with_capacity(header.questions as usize);
         for _ in 0..header.questions {
             let name = try!(Name::scan(&data[offset..], data));
             offset += name.byte_len();
@@ -27,7 +27,7 @@ impl<'a> Packet<'a> {
                 qclass: qclass,
             });
         }
-        let mut answers = Vec::new();
+        let mut answers = Vec::with_capacity(header.answers as usize);
         for _ in 0..header.answers {
             let name = try!(Name::scan(&data[offset..], data));
             offset += name.byte_len();
