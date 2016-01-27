@@ -1,3 +1,5 @@
+use std::i32;
+
 use byteorder::{BigEndian, ByteOrder};
 
 use {Header, Packet, Error, Question, Name, QueryType, QueryClass};
@@ -40,7 +42,10 @@ impl<'a> Packet<'a> {
             let cls = try!(Class::parse(
                 BigEndian::read_u16(&data[offset..offset+2])));
             offset += 2;
-            let ttl = BigEndian::read_u32(&data[offset..offset+4]);
+            let mut ttl = BigEndian::read_u32(&data[offset..offset+4]);
+            if ttl > i32::MAX as u32 {
+                ttl = 0;
+            }
             offset += 4;
             let rdlen = BigEndian::read_u16(&data[offset..offset+2]) as usize;
             offset += 2;
