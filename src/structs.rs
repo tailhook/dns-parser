@@ -2,6 +2,7 @@ use {QueryType, QueryClass, Name, Class, Header, RRData};
 
 
 /// Parsed DNS packet
+#[derive(Debug)]
 pub struct Packet<'a> {
     pub header: Header,
     pub questions: Vec<Question<'a>>,
@@ -11,6 +12,7 @@ pub struct Packet<'a> {
 }
 
 /// A parsed chunk of data in the Query section of the packet
+#[derive(Debug)]
 pub struct Question<'a> {
     pub qname: Name<'a>,
     pub qtype: QueryType,
@@ -22,6 +24,7 @@ pub struct Question<'a> {
 /// We aim to provide whole range of DNS records available. But as time is
 /// limited we have some types of packets which are parsed and other provided
 /// as unparsed slice of bytes.
+#[derive(Debug)]
 pub struct ResourceRecord<'a> {
     pub name: Name<'a>,
     pub cls: Class,
