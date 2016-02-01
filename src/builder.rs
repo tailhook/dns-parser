@@ -46,7 +46,6 @@ impl Builder {
         qtype: QueryType, qclass: QueryClass)
         -> &mut Builder
     {
-        println!("BUF {:?}", self.buf);
         if &self.buf[6..12] != b"\x00\x00\x00\x00\x00\x00" {
             panic!("Too late to add a question");
         }
