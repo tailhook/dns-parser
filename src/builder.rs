@@ -107,4 +107,13 @@ mod test {
                       \x07example\x03com\x00\x00\x01\x00\x01";
         assert_eq!(&bld.build().unwrap()[..], &result[..]);
     }
+
+    #[test]
+    fn build_srv_query() {
+        let mut bld = Builder::new_query(23513, true);
+        bld.add_question("_xmpp-server._tcp.gmail.com", QT::SRV, QC::IN);
+        let result = b"[\xd9\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\
+            \x0c_xmpp-server\x04_tcp\x05gmail\x03com\x00\x00!\x00\x01";
+        assert_eq!(&bld.build().unwrap()[..], &result[..]);
+    }
 }
