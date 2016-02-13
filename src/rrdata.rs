@@ -14,7 +14,7 @@ pub enum RRData<'a> {
     // Not implemented
     SRV { priority: u16, weight: u16, port: u16, target: Name<'a> },
     // Not implemented
-    MX { prefererence: u16, exchange: Name<'a> },
+    MX { preference: u16, exchange: Name<'a> },
     // Anything that can't be parsed yet
     Unknown(&'a [u8]),
 }
@@ -30,6 +30,15 @@ impl<'a> RRData<'a> {
                 }
                 Ok(RRData::A(
                     Ipv4Addr::from(BigEndian::read_u32(rdata))))
+            }
+            Type::MX => {
+                if rdata.len() < 3 {
+                    return Err(Error::WrongRdataLength);
+                }
+                Ok(RRData::MX {
+                    preference: BigEndian::read_u16(&rdata[..2]),
+                    exchange: try!(Name::scan(&rdata[2..], original)),
+                })
             }
             Type::SRV => {
                 if rdata.len() < 7 {

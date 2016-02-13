@@ -275,11 +275,64 @@ mod test {
             assert_eq!(packet.answers[i].cls, C::IN);
             assert_eq!(packet.answers[i].ttl, 900);
             match *&packet.answers[i].data {
-                RRData::SRV { priority, weight, port, ref target } => {
+                RRData::SRV { priority, weight, port, target } => {
                     assert_eq!(priority, items[i].0);
                     assert_eq!(weight, items[i].1);
                     assert_eq!(port, items[i].2);
                     assert_eq!(target.to_string(), (items[i].3).to_string());
+                }
+                ref x => panic!("Wrong rdata {:?}", x),
+            }
+        }
+    }
+
+    #[test]
+    fn parse_mx_response() {
+        let response = b"\xe3\xe8\x81\x80\x00\x01\x00\x05\x00\x00\x00\x00\
+            \x05gmail\x03com\x00\x00\x0f\x00\x01\xc0\x0c\x00\x0f\x00\x01\
+            \x00\x00\x04|\x00\x1b\x00\x05\rgmail-smtp-in\x01l\x06google\xc0\
+            \x12\xc0\x0c\x00\x0f\x00\x01\x00\x00\x04|\x00\t\x00\
+            \n\x04alt1\xc0)\xc0\x0c\x00\x0f\x00\x01\x00\x00\x04|\
+            \x00\t\x00(\x04alt4\xc0)\xc0\x0c\x00\x0f\x00\x01\x00\
+            \x00\x04|\x00\t\x00\x14\x04alt2\xc0)\xc0\x0c\x00\x0f\
+            \x00\x01\x00\x00\x04|\x00\t\x00\x1e\x04alt3\xc0)";
+        let packet = Packet::parse(response).unwrap();
+        assert_eq!(packet.header, Header {
+            id: 58344,
+            query: false,
+            opcode: StandardQuery,
+            authoritative: false,
+            truncated: false,
+            recursion_desired: true,
+            recursion_available: true,
+            response_code: NoError,
+            questions: 1,
+            answers: 5,
+            nameservers: 0,
+            additional: 0,
+        });
+        assert_eq!(packet.questions.len(), 1);
+        assert_eq!(packet.questions[0].qtype, QT::MX);
+        assert_eq!(packet.questions[0].qclass, QC::IN);
+        assert_eq!(&packet.questions[0].qname.to_string()[..],
+            "gmail.com");
+        assert_eq!(packet.answers.len(), 5);
+        let items = vec![
+            ( 5, "gmail-smtp-in.l.google.com"),
+            (10, "alt1.gmail-smtp-in.l.google.com"),
+            (40, "alt4.gmail-smtp-in.l.google.com"),
+            (20, "alt2.gmail-smtp-in.l.google.com"),
+            (30, "alt3.gmail-smtp-in.l.google.com"),
+        ];
+        for i in 0..5 {
+            assert_eq!(&packet.answers[i].name.to_string()[..],
+                "gmail.com");
+            assert_eq!(packet.answers[i].cls, C::IN);
+            assert_eq!(packet.answers[i].ttl, 1148);
+            match *&packet.answers[i].data {
+                RRData::MX { preference, exchange } => {
+                    assert_eq!(preference, items[i].0);
+                    assert_eq!(exchange.to_string(), (items[i].1).to_string());
                 }
                 ref x => panic!("Wrong rdata {:?}", x),
             }
