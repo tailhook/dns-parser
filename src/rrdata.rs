@@ -20,7 +20,7 @@ pub enum RRData<'a> {
 }
 
 impl<'a> RRData<'a> {
-    pub fn parse(typ: Type, rdata: &'a [u8], _original: &'a [u8])
+    pub fn parse(typ: Type, rdata: &'a [u8], original: &'a [u8])
         -> Result<RRData<'a>, Error>
     {
         match typ {
@@ -30,6 +30,17 @@ impl<'a> RRData<'a> {
                 }
                 Ok(RRData::A(
                     Ipv4Addr::from(BigEndian::read_u32(rdata))))
+            }
+            Type::SRV => {
+                if rdata.len() < 7 {
+                    return Err(Error::WrongRdataLength);
+                }
+                Ok(RRData::SRV {
+                    priority: BigEndian::read_u16(&rdata[..2]),
+                    weight: BigEndian::read_u16(&rdata[2..4]),
+                    port: BigEndian::read_u16(&rdata[4..6]),
+                    target: try!(Name::scan(&rdata[6..], original)),
+                })
             }
             _ => {
                 Ok(RRData::Unknown(rdata))
