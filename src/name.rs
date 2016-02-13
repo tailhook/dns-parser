@@ -11,7 +11,7 @@ use {Error};
 ///
 /// This is contains just a reference to a slice that contains the data.
 /// You may turn this into a string using `.to_string()`
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Name<'a>{
     labels: &'a [u8],
     /// This is the original buffer size. The compressed names in original
@@ -73,6 +73,9 @@ impl<'a> fmt::Display for Name<'a> {
             } else if byte & 0b1100_0000 == 0b1100_0000 {
                 let off = (BigEndian::read_u16(&data[pos..pos+2])
                            & !0b1100_0000_0000_0000) as usize;
+                if pos != 0 {
+                    try!(fmt.write_char('.'));
+                }
                 return fmt::Display::fmt(
                     &Name::scan(&original[off..], original).unwrap(), fmt)
             } else if byte & 0b1100_0000 == 0 {
