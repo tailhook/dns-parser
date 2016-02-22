@@ -75,7 +75,7 @@ impl<'a> Packet<'a> {
 #[cfg(test)]
 mod test {
 
-    use std::net::Ipv4Addr;
+    use std::net::{Ipv4Addr, Ipv6Addr};
     use {Packet, Header};
     use Opcode::*;
     use ResponseCode::NoError;
@@ -339,5 +339,43 @@ mod test {
         }
     }
 
-}
+    #[test]
+    fn parse_aaaa_response() {
+        let response = b"\xa9\xd9\x81\x80\x00\x01\x00\x01\x00\x00\x00\x00\x06\
+            google\x03com\x00\x00\x1c\x00\x01\xc0\x0c\x00\x1c\x00\x01\x00\x00\
+            \x00\x8b\x00\x10*\x00\x14P@\t\x08\x12\x00\x00\x00\x00\x00\x00 \x0e";
 
+        let packet = Packet::parse(response).unwrap();
+        assert_eq!(packet.header, Header {
+            id: 43481,
+            query: false,
+            opcode: StandardQuery,
+            authoritative: false,
+            truncated: false,
+            recursion_desired: true,
+            recursion_available: true,
+            response_code: NoError,
+            questions: 1,
+            answers: 1,
+            nameservers: 0,
+            additional: 0,
+        });
+
+        assert_eq!(packet.questions.len(), 1);
+        assert_eq!(packet.questions[0].qtype, QT::AAAA);
+        assert_eq!(packet.questions[0].qclass, QC::IN);
+        assert_eq!(&packet.questions[0].qname.to_string()[..], "google.com");
+        assert_eq!(packet.answers.len(), 1);
+        assert_eq!(&packet.answers[0].name.to_string()[..], "google.com");
+        assert_eq!(packet.answers[0].cls, C::IN);
+        assert_eq!(packet.answers[0].ttl, 139);
+        match packet.answers[0].data {
+            RRData::AAAA(addr) => {
+                assert_eq!(addr, Ipv6Addr::new(
+                    0x2A00, 0x1450, 0x4009, 0x812, 0, 0, 0, 0x200e)
+                );
+            }
+            ref x => panic!("Wrong rdata {:?}", x),
+        }
+    }
+}

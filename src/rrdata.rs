@@ -1,4 +1,4 @@
-use std::net::Ipv4Addr;
+use std::net::{Ipv4Addr, Ipv6Addr};
 
 use byteorder::{BigEndian, ByteOrder};
 
@@ -11,9 +11,8 @@ pub enum RRData<'a> {
     // Not implemented
     CNAME(Name<'a>),
     A(Ipv4Addr),
-    // Not implemented
+    AAAA(Ipv6Addr),
     SRV { priority: u16, weight: u16, port: u16, target: Name<'a> },
-    // Not implemented
     MX { preference: u16, exchange: Name<'a> },
     // Anything that can't be parsed yet
     Unknown(&'a [u8]),
@@ -30,6 +29,21 @@ impl<'a> RRData<'a> {
                 }
                 Ok(RRData::A(
                     Ipv4Addr::from(BigEndian::read_u32(rdata))))
+            }
+            Type::AAAA => {
+                if rdata.len() != 16 {
+                    return Err(Error::WrongRdataLength);
+                }
+                Ok(RRData::AAAA(Ipv6Addr::new(
+                    BigEndian::read_u16(&rdata[0..2]),
+                    BigEndian::read_u16(&rdata[2..4]),
+                    BigEndian::read_u16(&rdata[4..6]),
+                    BigEndian::read_u16(&rdata[6..8]),
+                    BigEndian::read_u16(&rdata[8..10]),
+                    BigEndian::read_u16(&rdata[10..12]),
+                    BigEndian::read_u16(&rdata[12..14]),
+                    BigEndian::read_u16(&rdata[14..16]),
+                )))
             }
             Type::MX => {
                 if rdata.len() < 3 {
