@@ -8,7 +8,6 @@ use {Name, Type, Error};
 /// The enumeration that represents known types of DNS resource records data
 #[derive(Debug)]
 pub enum RRData<'a> {
-    // Not implemented
     CNAME(Name<'a>),
     A(Ipv4Addr),
     AAAA(Ipv6Addr),
@@ -44,6 +43,9 @@ impl<'a> RRData<'a> {
                     BigEndian::read_u16(&rdata[12..14]),
                     BigEndian::read_u16(&rdata[14..16]),
                 )))
+            }
+            Type::CNAME => {
+                Ok(RRData::CNAME(try!(Name::scan(rdata, original))))
             }
             Type::MX => {
                 if rdata.len() < 3 {
