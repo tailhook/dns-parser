@@ -75,7 +75,7 @@ impl<'a> Packet<'a> {
 #[cfg(test)]
 mod test {
 
-    use std::net::Ipv4Addr;
+    use std::net::{Ipv4Addr, Ipv6Addr};
     use {Packet, Header};
     use Opcode::*;
     use ResponseCode::NoError;
@@ -339,5 +339,108 @@ mod test {
         }
     }
 
-}
+    #[test]
+    fn parse_aaaa_response() {
+        let response = b"\xa9\xd9\x81\x80\x00\x01\x00\x01\x00\x00\x00\x00\x06\
+            google\x03com\x00\x00\x1c\x00\x01\xc0\x0c\x00\x1c\x00\x01\x00\x00\
+            \x00\x8b\x00\x10*\x00\x14P@\t\x08\x12\x00\x00\x00\x00\x00\x00 \x0e";
 
+        let packet = Packet::parse(response).unwrap();
+        assert_eq!(packet.header, Header {
+            id: 43481,
+            query: false,
+            opcode: StandardQuery,
+            authoritative: false,
+            truncated: false,
+            recursion_desired: true,
+            recursion_available: true,
+            response_code: NoError,
+            questions: 1,
+            answers: 1,
+            nameservers: 0,
+            additional: 0,
+        });
+
+        assert_eq!(packet.questions.len(), 1);
+        assert_eq!(packet.questions[0].qtype, QT::AAAA);
+        assert_eq!(packet.questions[0].qclass, QC::IN);
+        assert_eq!(&packet.questions[0].qname.to_string()[..], "google.com");
+        assert_eq!(packet.answers.len(), 1);
+        assert_eq!(&packet.answers[0].name.to_string()[..], "google.com");
+        assert_eq!(packet.answers[0].cls, C::IN);
+        assert_eq!(packet.answers[0].ttl, 139);
+        match packet.answers[0].data {
+            RRData::AAAA(addr) => {
+                assert_eq!(addr, Ipv6Addr::new(
+                    0x2A00, 0x1450, 0x4009, 0x812, 0, 0, 0, 0x200e)
+                );
+            }
+            ref x => panic!("Wrong rdata {:?}", x),
+        }
+    }
+
+    #[test]
+    fn parse_cname_response() {
+        let response = b"\xfc\x9d\x81\x80\x00\x01\x00\x06\x00\x02\x00\x02\x03\
+            cdn\x07sstatic\x03net\x00\x00\x01\x00\x01\xc0\x0c\x00\x05\x00\x01\
+            \x00\x00\x00f\x00\x02\xc0\x10\xc0\x10\x00\x01\x00\x01\x00\x00\x00\
+            f\x00\x04h\x10g\xcc\xc0\x10\x00\x01\x00\x01\x00\x00\x00f\x00\x04h\
+            \x10k\xcc\xc0\x10\x00\x01\x00\x01\x00\x00\x00f\x00\x04h\x10h\xcc\
+            \xc0\x10\x00\x01\x00\x01\x00\x00\x00f\x00\x04h\x10j\xcc\xc0\x10\
+            \x00\x01\x00\x01\x00\x00\x00f\x00\x04h\x10i\xcc\xc0\x10\x00\x02\
+            \x00\x01\x00\x00\x99L\x00\x0b\x08cf-dns02\xc0\x10\xc0\x10\x00\x02\
+            \x00\x01\x00\x00\x99L\x00\x0b\x08cf-dns01\xc0\x10\xc0\xa2\x00\x01\
+            \x00\x01\x00\x00\x99L\x00\x04\xad\xf5:5\xc0\x8b\x00\x01\x00\x01\x00\
+            \x00\x99L\x00\x04\xad\xf5;\x04";
+
+        let packet = Packet::parse(response).unwrap();
+        assert_eq!(packet.header, Header {
+            id: 64669,
+            query: false,
+            opcode: StandardQuery,
+            authoritative: false,
+            truncated: false,
+            recursion_desired: true,
+            recursion_available: true,
+            response_code: NoError,
+            questions: 1,
+            answers: 6,
+            nameservers: 2,
+            additional: 2,
+        });
+
+        assert_eq!(packet.questions.len(), 1);
+        assert_eq!(packet.questions[0].qtype, QT::A);
+        assert_eq!(packet.questions[0].qclass, QC::IN);
+        assert_eq!(&packet.questions[0].qname.to_string()[..], "cdn.sstatic.net");
+        assert_eq!(packet.answers.len(), 6);
+        assert_eq!(&packet.answers[0].name.to_string()[..], "cdn.sstatic.net");
+        assert_eq!(packet.answers[0].cls, C::IN);
+        assert_eq!(packet.answers[0].ttl, 102);
+        match packet.answers[0].data {
+            RRData::CNAME(cname) => {
+                assert_eq!(&cname.to_string(), "sstatic.net");
+            }
+            ref x => panic!("Wrong rdata {:?}", x),
+        }
+
+        let ips = vec![
+            Ipv4Addr::new(104, 16, 103, 204),
+            Ipv4Addr::new(104, 16, 107, 204),
+            Ipv4Addr::new(104, 16, 104, 204),
+            Ipv4Addr::new(104, 16, 106, 204),
+            Ipv4Addr::new(104, 16, 105, 204),
+        ];
+        for i in 1..6 {
+            assert_eq!(&packet.answers[i].name.to_string()[..], "sstatic.net");
+            assert_eq!(packet.answers[i].cls, C::IN);
+            assert_eq!(packet.answers[i].ttl, 102);
+            match packet.answers[i].data {
+                RRData::A(addr) => {
+                    assert_eq!(addr, ips[i-1]);
+                }
+                ref x => panic!("Wrong rdata {:?}", x),
+            }
+        }
+    }
+}
