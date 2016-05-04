@@ -21,4 +21,3 @@ matches = "0.1.2"
 [lib]
 name = "dns_parser"
 path = "src/lib.rs"
-

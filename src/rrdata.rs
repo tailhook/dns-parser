@@ -9,6 +9,7 @@ use {Name, Type, Error};
 #[derive(Debug)]
 pub enum RRData<'a> {
     CNAME(Name<'a>),
+    NS(Name<'a>),
     A(Ipv4Addr),
     AAAA(Ipv6Addr),
     SRV { priority: u16, weight: u16, port: u16, target: Name<'a> },
@@ -46,6 +47,9 @@ impl<'a> RRData<'a> {
             }
             Type::CNAME => {
                 Ok(RRData::CNAME(try!(Name::scan(rdata, original))))
+            }
+            Type::NS => {
+                Ok(RRData::NS(try!(Name::scan(rdata, original))))
             }
             Type::MX => {
                 if rdata.len() < 3 {
