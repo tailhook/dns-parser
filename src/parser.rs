@@ -37,12 +37,16 @@ impl<'a> Packet<'a> {
         for _ in 0..header.nameservers {
             nameservers.push(try!(parse_record(data, &mut offset)));
         }
+        let mut additional = Vec::with_capacity(header.additional as usize);
+        for _ in 0..header.additional {
+            additional.push(try!(parse_record(data, &mut offset)));
+        }
         Ok(Packet {
             header: header,
             questions: questions,
             answers: answers,
             nameservers: nameservers,
-            additional: Vec::new(), // TODO(tailhook)
+            additional: additional,
         })
     }
 }
@@ -207,6 +211,70 @@ mod test {
              ref x => panic!("Wrong rdata {:?}", x),
          }
      }
+
+     #[test]
+     fn parse_additional_record_response() {
+         let response = b"\x4a\xf0\x81\x80\x00\x01\x00\x01\x00\x01\x00\x01\
+                          \x03www\x05skype\x03com\x00\x00\x01\x00\x01\
+                          \xc0\x0c\x00\x05\x00\x01\x00\x00\x0e\x10\
+                          \x00\x1c\x07\x6c\x69\x76\x65\x63\x6d\x73\x0e\x74\
+                          \x72\x61\x66\x66\x69\x63\x6d\x61\x6e\x61\x67\x65\
+                          \x72\x03\x6e\x65\x74\x00\
+                          \xc0\x42\x00\x02\x00\x01\x00\x01\xd5\xd3\x00\x11\
+                          \x01\x67\x0c\x67\x74\x6c\x64\x2d\x73\x65\x72\x76\x65\x72\x73\
+                          \xc0\x42\
+                          \x01\x61\xc0\x55\x00\x01\x00\x01\x00\x00\xa3\x1c\
+                          \x00\x04\xc0\x05\x06\x1e";
+          let packet = Packet::parse(response).unwrap();
+          assert_eq!(packet.header, Header {
+              id: 19184,
+              query: false,
+              opcode: StandardQuery,
+              authoritative: false,
+              truncated: false,
+              recursion_desired: true,
+              recursion_available: true,
+              response_code: NoError,
+              questions: 1,
+              answers: 1,
+              nameservers: 1,
+              additional: 1,
+          });
+          assert_eq!(packet.questions.len(), 1);
+          assert_eq!(packet.questions[0].qtype, QT::A);
+          assert_eq!(packet.questions[0].qclass, QC::IN);
+          assert_eq!(&packet.questions[0].qname.to_string()[..], "www.skype.com");
+          assert_eq!(packet.answers.len(), 1);
+          assert_eq!(&packet.answers[0].name.to_string()[..], "www.skype.com");
+          assert_eq!(packet.answers[0].cls, C::IN);
+          assert_eq!(packet.answers[0].ttl, 3600);
+          match packet.answers[0].data {
+              RRData::CNAME(cname) => {
+                  assert_eq!(&cname.to_string()[..], "livecms.trafficmanager.net");
+              }
+              ref x => panic!("Wrong rdata {:?}", x),
+          }
+          assert_eq!(packet.nameservers.len(), 1);
+          assert_eq!(&packet.nameservers[0].name.to_string()[..], "net");
+          assert_eq!(packet.nameservers[0].cls, C::IN);
+          assert_eq!(packet.nameservers[0].ttl, 120275);
+          match packet.nameservers[0].data {
+              RRData::NS(ns) => {
+                  assert_eq!(&ns.to_string()[..], "g.gtld-servers.net");
+              }
+              ref x => panic!("Wrong rdata {:?}", x),
+          }
+          assert_eq!(packet.additional.len(), 1);
+          assert_eq!(&packet.additional[0].name.to_string()[..], "a.gtld-servers.net");
+          assert_eq!(packet.additional[0].cls, C::IN);
+          assert_eq!(packet.additional[0].ttl, 41756);
+          match packet.additional[0].data {
+              RRData::A(addr) => {
+                  assert_eq!(addr, Ipv4Addr::new(192, 5, 6, 30));
+              }
+              ref x => panic!("Wrong rdata {:?}", x),
+          }
+      }
 
     #[test]
     fn parse_multiple_answers() {
