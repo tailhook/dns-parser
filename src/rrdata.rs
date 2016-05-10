@@ -2,7 +2,7 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 
 use byteorder::{BigEndian, ByteOrder};
 
-use {Name, Type, Error};
+use {Name, Type, Error, SoaRecord};
 
 
 /// The enumeration that represents known types of DNS resource records data
@@ -13,6 +13,7 @@ pub enum RRData<'a> {
     A(Ipv4Addr),
     AAAA(Ipv6Addr),
     SRV { priority: u16, weight: u16, port: u16, target: Name<'a> },
+    SOA(SoaRecord<'a>),
     MX { preference: u16, exchange: Name<'a> },
     // Anything that can't be parsed yet
     Unknown(&'a [u8]),
@@ -70,6 +71,25 @@ impl<'a> RRData<'a> {
                     port: BigEndian::read_u16(&rdata[4..6]),
                     target: try!(Name::scan(&rdata[6..], original)),
                 })
+            }
+            Type::SOA => {
+                let mut pos = 0;
+                let primary_name_server = try!(Name::scan(rdata, original));
+                pos += primary_name_server.byte_len();
+                let mailbox = try!(Name::scan(&rdata[pos..], original));
+                pos += mailbox.byte_len();
+                if rdata[pos..].len() < 20 {
+                    return Err(Error::WrongRdataLength);
+                }
+                Ok(RRData::SOA(SoaRecord {
+                    primary_ns: primary_name_server,
+                    mailbox: mailbox,
+                    serial: BigEndian::read_u32(&rdata[pos..(pos+4)]),
+                    refresh: BigEndian::read_u32(&rdata[(pos+4)..(pos+8)]),
+                    retry: BigEndian::read_u32(&rdata[(pos+8)..(pos+12)]),
+                    expire: BigEndian::read_u32(&rdata[(pos+12)..(pos+16)]),
+                    minimum_ttl: BigEndian::read_u32(&rdata[(pos+16)..(pos+20)]),
+                }))
             }
             _ => {
                 Ok(RRData::Unknown(rdata))
