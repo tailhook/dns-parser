@@ -31,3 +31,14 @@ pub struct ResourceRecord<'a> {
     pub ttl: u32,
     pub data: RRData<'a>,
 }
+
+#[derive(Debug)]
+pub struct SoaRecord<'a> {
+    pub primary_ns: Name<'a>,
+    pub mailbox: Name<'a>,
+    pub serial: u32,
+    pub refresh: u32,
+    pub retry: u32,
+    pub expire: u32,
+    pub minimum_ttl: u32,
+}

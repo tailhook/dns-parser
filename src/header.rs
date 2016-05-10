@@ -42,7 +42,7 @@ impl Header {
         let header = Header {
             id: BigEndian::read_u16(&data[..2]),
             query: flags & flag::QUERY == 0,
-            opcode: (flags & flag::OPCODE_MASK
+            opcode: ((flags & flag::OPCODE_MASK)
                      >> flag::OPCODE_MASK.trailing_zeros()).into(),
             authoritative: flags & flag::AUTHORITATIVE != 0,
             truncated: flags & flag::TRUNCATED != 0,
