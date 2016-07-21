@@ -1,7 +1,10 @@
 quick_error! {
     /// Error parsing DNS packet
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum Error {
+        BadPointer {
+            description("invalid compression pointer not pointing backwards when parsing label")
+        }
         HeaderTooShort {
             description("packet is smaller than header size")
         }
