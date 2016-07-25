@@ -43,6 +43,9 @@ impl<'a> Name<'a> {
                 return Ok(Name { labels: &data[..pos+2], original: original });
             } else if byte & 0b1100_0000 == 0 {
                 let end = pos + byte as usize + 1;
+                if data.len() < end {
+                    return Err(Error::UnexpectedEOF);
+                }
                 if !data[pos+1..end].is_ascii() {
                     return Err(Error::LabelIsNotAscii);
                 }
