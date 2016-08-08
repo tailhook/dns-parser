@@ -3,7 +3,7 @@ use std::i32;
 use byteorder::{BigEndian, ByteOrder};
 
 use {Header, Packet, Error, Question, Name, QueryType, QueryClass};
-use {Type, Class, ResourceRecord, RRData};
+use {Type, Class, ResourceRecord, OptRecord, RRData};
 
 
 impl<'a> Packet<'a> {
@@ -38,8 +38,13 @@ impl<'a> Packet<'a> {
             nameservers.push(try!(parse_record(data, &mut offset)));
         }
         let mut additional = Vec::with_capacity(header.additional as usize);
+        let mut opt = None;
         for _ in 0..header.additional {
-            additional.push(try!(parse_record(data, &mut offset)));
+            if data[offset..offset+3] == [0, 0, 41] {
+                opt = parse_opt_record(data, &mut offset).ok();
+            } else {
+                additional.push(try!(parse_record(data, &mut offset)));
+            }
         }
         Ok(Packet {
             header: header,
@@ -47,8 +52,39 @@ impl<'a> Packet<'a> {
             answers: answers,
             nameservers: nameservers,
             additional: additional,
+            opt: opt,
         })
     }
+}
+
+fn parse_opt_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<OptRecord<'a>, Error> {
+    *offset += 1;
+    let typ = try!(Type::parse( BigEndian::read_u16(&data[*offset..*offset+2])));
+    // check this
+    *offset += 2;
+    let udp = BigEndian::read_u16(&data[*offset..*offset+2]);
+    *offset += 2;
+    let extrcode = data[*offset];
+    *offset += 1;
+    let version = data[*offset];
+    *offset += 1;
+    let flags = BigEndian::read_u16(&data[*offset..*offset+2]);
+    *offset += 2;
+    let rdlen = BigEndian::read_u16(&data[*offset..*offset+2]) as usize;
+    *offset += 2;
+    if *offset + rdlen > data.len() {
+        return Err(Error::UnexpectedEOF);
+    }
+    let data = try!(RRData::parse(typ, &data[*offset..*offset+rdlen], data));
+    *offset += rdlen;
+
+    Ok(OptRecord {
+        udp: udp,
+        extrcode: extrcode,
+        version: version,
+        flags: flags,
+        data: data,
+    })
 }
 
 // Generic function to parse answer, nameservers, and additional records.

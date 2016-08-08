@@ -12,7 +12,7 @@ mod rrdata;
 mod builder;
 
 pub use enums::{Type, QueryType, Class, QueryClass, ResponseCode, Opcode};
-pub use structs::{Question, ResourceRecord, Packet, SoaRecord};
+pub use structs::{Question, ResourceRecord, OptRecord, Packet, SoaRecord};
 pub use name::{Name};
 pub use error::{Error};
 pub use header::{Header};
