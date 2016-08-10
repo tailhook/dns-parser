@@ -10,7 +10,8 @@ mod flag {
     pub const RECURSION_DESIRED:   u16 = 0b0000_0001_0000_0000;
     pub const RECURSION_AVAILABLE: u16 = 0b0000_0000_1000_0000;
     pub const AUTHENTICATED_DATA:  u16 = 0b0000_0000_0010_0000;
-    pub const RESERVED_MASK:       u16 = 0b0000_0000_0101_0000;
+    pub const CHECKING_DISABLED:   u16 = 0b0000_0000_0001_0000;
+    pub const RESERVED_MASK:       u16 = 0b0000_0000_0100_0000;
     pub const RESPONSE_CODE_MASK:  u16 = 0b0000_0000_0000_1111;
 }
 
@@ -25,6 +26,7 @@ pub struct Header {
     pub recursion_desired: bool,
     pub recursion_available: bool,
     pub authenticated_data: bool,
+    pub checking_disabled: bool,
     pub response_code: ResponseCode,
     pub questions: u16,
     pub answers: u16,
@@ -51,6 +53,7 @@ impl Header {
             recursion_desired: flags & flag::RECURSION_DESIRED != 0,
             recursion_available: flags & flag::RECURSION_AVAILABLE != 0,
             authenticated_data: flags & flag::AUTHENTICATED_DATA != 0,
+            checking_disabled: flags & flag::CHECKING_DISABLED != 0,
             response_code: From::from((flags&flag::RESPONSE_CODE_MASK) as u8),
             questions: BigEndian::read_u16(&data[4..6]),
             answers: BigEndian::read_u16(&data[6..8]),
@@ -113,6 +116,7 @@ mod test {
             recursion_desired: true,
             recursion_available: false,
             authenticated_data: false,
+            checking_disabled: false,
             response_code: NoError,
             questions: 1,
             answers: 0,
@@ -137,6 +141,7 @@ mod test {
             recursion_desired: true,
             recursion_available: true,
             authenticated_data: false,
+            checking_disabled: false,
             response_code: NoError,
             questions: 1,
             answers: 1,
@@ -159,6 +164,7 @@ mod test {
             recursion_desired: true,
             recursion_available: false,
             authenticated_data: true,
+            checking_disabled: false,
             response_code: NoError,
             questions: 1,
             answers: 0,
@@ -167,4 +173,26 @@ mod test {
         });
     }
 
+    #[test]
+    fn parse_query_with_cd_set() {
+        let query = b"\x06%\x01\x10\x00\x01\x00\x00\x00\x00\x00\x00\
+                      \x07example\x03com\x00\x00\x01\x00\x01";
+        let header = Header::parse(query).unwrap();
+        assert_eq!(header, Header {
+            id: 1573,
+            query: true,
+            opcode: StandardQuery,
+            authoritative: false,
+            truncated: false,
+            recursion_desired: true,
+            recursion_available: false,
+            authenticated_data: false,
+            checking_disabled: true,
+            response_code: NoError,
+            questions: 1,
+            answers: 0,
+            nameservers: 0,
+            additional: 0,
+        });
+    }
 }
