@@ -26,6 +26,7 @@ impl Builder {
             recursion_desired: recursion,
             recursion_available: false,
             authenticated_data: false,
+            checking_disabled: false,
             response_code: ResponseCode::NoError,
             questions: 0,
             answers: 0,

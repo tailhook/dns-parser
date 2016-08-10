@@ -10,7 +10,8 @@ mod flag {
     pub const RECURSION_DESIRED:   u16 = 0b0000_0001_0000_0000;
     pub const RECURSION_AVAILABLE: u16 = 0b0000_0000_1000_0000;
     pub const AUTHENTICATED_DATA:  u16 = 0b0000_0000_0010_0000;
-    pub const RESERVED_MASK:       u16 = 0b0000_0000_0101_0000;
+    pub const CHECKING_DISABLED:   u16 = 0b0000_0000_0001_0000;
+    pub const RESERVED_MASK:       u16 = 0b0000_0000_0100_0000;
     pub const RESPONSE_CODE_MASK:  u16 = 0b0000_0000_0000_1111;
 }
 
@@ -25,6 +26,7 @@ pub struct Header {
     pub recursion_desired: bool,
     pub recursion_available: bool,
     pub authenticated_data: bool,
+    pub checking_disabled: bool,
     pub response_code: ResponseCode,
     pub questions: u16,
     pub answers: u16,
@@ -51,6 +53,7 @@ impl Header {
             recursion_desired: flags & flag::RECURSION_DESIRED != 0,
             recursion_available: flags & flag::RECURSION_AVAILABLE != 0,
             authenticated_data: flags & flag::AUTHENTICATED_DATA != 0,
+            checking_disabled: flags & flag::CHECKING_DISABLED != 0,
             response_code: From::from((flags&flag::RESPONSE_CODE_MASK) as u8),
             questions: BigEndian::read_u16(&data[4..6]),
             answers: BigEndian::read_u16(&data[6..8]),
