@@ -173,4 +173,26 @@ mod test {
         });
     }
 
+    #[test]
+    fn parse_query_with_cd_set() {
+        let query = b"\x06%\x01\x10\x00\x01\x00\x00\x00\x00\x00\x00\
+                      \x07example\x03com\x00\x00\x01\x00\x01";
+        let header = Header::parse(query).unwrap();
+        assert_eq!(header, Header {
+            id: 1573,
+            query: true,
+            opcode: StandardQuery,
+            authoritative: false,
+            truncated: false,
+            recursion_desired: true,
+            recursion_available: false,
+            authenticated_data: false,
+            checking_disabled: true,
+            response_code: NoError,
+            questions: 1,
+            answers: 0,
+            nameservers: 0,
+            additional: 0,
+        });
+    }
 }
