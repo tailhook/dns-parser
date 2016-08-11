@@ -5,6 +5,7 @@ use byteorder::{BigEndian, ByteOrder};
 use {Header, Packet, Error, Question, Name, QueryType, QueryClass};
 use {Type, Class, ResourceRecord, OptRecord, RRData};
 
+const OPT_RR_START: [u8; 3] = [0, 0, 41];
 
 impl<'a> Packet<'a> {
     pub fn parse(data: &[u8]) -> Result<Packet, Error> {
@@ -40,7 +41,7 @@ impl<'a> Packet<'a> {
         let mut additional = Vec::with_capacity(header.additional as usize);
         let mut opt = None;
         for _ in 0..header.additional {
-            if data[offset..offset+3] == [0, 0, 41] {
+            if data[offset..offset+3] == OPT_RR_START {
                 opt = parse_opt_record(data, &mut offset).ok();
             } else {
                 additional.push(try!(parse_record(data, &mut offset)));
