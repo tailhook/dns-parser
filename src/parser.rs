@@ -62,7 +62,9 @@ fn parse_opt_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<OptRecord<
     *offset += 1;
     let typ = try!(Type::parse(
         BigEndian::read_u16(&data[*offset..*offset+2])));
-    // check this
+    if typ != Type::OPT {
+        return Err(Error::InvalidType(typ as u16));
+    }
     *offset += 2;
     let udp = BigEndian::read_u16(&data[*offset..*offset+2]);
     *offset += 2;
