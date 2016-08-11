@@ -60,7 +60,8 @@ impl<'a> Packet<'a> {
 
 fn parse_opt_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<OptRecord<'a>, Error> {
     *offset += 1;
-    let typ = try!(Type::parse( BigEndian::read_u16(&data[*offset..*offset+2])));
+    let typ = try!(Type::parse(
+        BigEndian::read_u16(&data[*offset..*offset+2])));
     // check this
     *offset += 2;
     let udp = BigEndian::read_u16(&data[*offset..*offset+2]);
@@ -76,7 +77,8 @@ fn parse_opt_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<OptRecord<
     if *offset + rdlen > data.len() {
         return Err(Error::UnexpectedEOF);
     }
-    let data = try!(RRData::parse(typ, &data[*offset..*offset+rdlen], data));
+    let data = try!(RRData::parse(typ,
+        &data[*offset..*offset+rdlen], data));
     *offset += rdlen;
 
     Ok(OptRecord {
