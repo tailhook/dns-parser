@@ -721,4 +721,42 @@ mod test {
             }
         }
     }
+
+    #[test]
+    fn parse_example_query_edns() {
+        let query = b"\x95\xce\x01\x00\x00\x01\x00\x00\x00\x00\x00\x01\
+            \x06google\x03com\x00\x00\x01\x00\
+            \x01\x00\x00\x29\x10\x00\x00\x00\x00\x00\x00\x00";
+        let packet = Packet::parse(query).unwrap();
+        assert_eq!(packet.header, Header {
+            id: 38350,
+            query: true,
+            opcode: StandardQuery,
+            authoritative: false,
+            truncated: false,
+            recursion_desired: true,
+            recursion_available: false,
+            authenticated_data: false,
+            checking_disabled: false,
+            response_code: NoError,
+            questions: 1,
+            answers: 0,
+            nameservers: 0,
+            additional: 1,
+        });
+        assert_eq!(packet.questions.len(), 1);
+        assert_eq!(packet.questions[0].qtype, QT::A);
+        assert_eq!(packet.questions[0].qclass, QC::IN);
+        assert_eq!(&packet.questions[0].qname.to_string()[..], "google.com");
+        assert_eq!(packet.answers.len(), 0);
+        match packet.opt {
+            Some(opt) => {
+                assert_eq!(opt.udp, 4096);
+                assert_eq!(opt.extrcode, 0);
+                assert_eq!(opt.version, 0);
+                assert_eq!(opt.flags, 0);
+            },
+            None => panic!("Missing OPT RR")
+        }
+    }
 }
