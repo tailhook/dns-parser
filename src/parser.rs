@@ -58,40 +58,6 @@ impl<'a> Packet<'a> {
     }
 }
 
-fn parse_opt_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<OptRecord<'a>, Error> {
-    *offset += 1;
-    let typ = try!(Type::parse(
-        BigEndian::read_u16(&data[*offset..*offset+2])));
-    if typ != Type::OPT {
-        return Err(Error::InvalidType(typ as u16));
-    }
-    *offset += 2;
-    let udp = BigEndian::read_u16(&data[*offset..*offset+2]);
-    *offset += 2;
-    let extrcode = data[*offset];
-    *offset += 1;
-    let version = data[*offset];
-    *offset += 1;
-    let flags = BigEndian::read_u16(&data[*offset..*offset+2]);
-    *offset += 2;
-    let rdlen = BigEndian::read_u16(&data[*offset..*offset+2]) as usize;
-    *offset += 2;
-    if *offset + rdlen > data.len() {
-        return Err(Error::UnexpectedEOF);
-    }
-    let data = try!(RRData::parse(typ,
-        &data[*offset..*offset+rdlen], data));
-    *offset += rdlen;
-
-    Ok(OptRecord {
-        udp: udp,
-        extrcode: extrcode,
-        version: version,
-        flags: flags,
-        data: data,
-    })
-}
-
 // Generic function to parse answer, nameservers, and additional records.
 fn parse_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<ResourceRecord<'a>, Error> {
     let name = try!(Name::scan(&data[*offset..], data));
@@ -122,6 +88,41 @@ fn parse_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<ResourceRecord
         name: name,
         cls: cls,
         ttl: ttl,
+        data: data,
+    })
+}
+
+// Function to parse an RFC 6891 OPT Pseudo RR
+fn parse_opt_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<OptRecord<'a>, Error> {
+    *offset += 1;
+    let typ = try!(Type::parse(
+        BigEndian::read_u16(&data[*offset..*offset+2])));
+    if typ != Type::OPT {
+        return Err(Error::InvalidType(typ as u16));
+    }
+    *offset += 2;
+    let udp = BigEndian::read_u16(&data[*offset..*offset+2]);
+    *offset += 2;
+    let extrcode = data[*offset];
+    *offset += 1;
+    let version = data[*offset];
+    *offset += 1;
+    let flags = BigEndian::read_u16(&data[*offset..*offset+2]);
+    *offset += 2;
+    let rdlen = BigEndian::read_u16(&data[*offset..*offset+2]) as usize;
+    *offset += 2;
+    if *offset + rdlen > data.len() {
+        return Err(Error::UnexpectedEOF);
+    }
+    let data = try!(RRData::parse(typ,
+        &data[*offset..*offset+rdlen], data));
+    *offset += rdlen;
+
+    Ok(OptRecord {
+        udp: udp,
+        extrcode: extrcode,
+        version: version,
+        flags: flags,
         data: data,
     })
 }
