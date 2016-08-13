@@ -42,7 +42,7 @@ impl<'a> Packet<'a> {
         let mut opt = None;
         for _ in 0..header.additional {
             if data[offset..offset+3] == OPT_RR_START {
-                opt = parse_opt_record(data, &mut offset).ok();
+                opt = Some(try!(parse_opt_record(data, &mut offset)));
             } else {
                 additional.push(try!(parse_record(data, &mut offset)));
             }
