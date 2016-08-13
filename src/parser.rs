@@ -41,7 +41,7 @@ impl<'a> Packet<'a> {
         let mut additional = Vec::with_capacity(header.additional as usize);
         let mut opt = None;
         for _ in 0..header.additional {
-            if data[offset..offset+3] == OPT_RR_START {
+            if offset + 3 <= data.len() && data[offset..offset+3] == OPT_RR_START {
                 opt = Some(try!(parse_opt_record(data, &mut offset)));
             } else {
                 additional.push(try!(parse_record(data, &mut offset)));
@@ -94,6 +94,9 @@ fn parse_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<ResourceRecord
 
 // Function to parse an RFC 6891 OPT Pseudo RR
 fn parse_opt_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<OptRecord<'a>, Error> {
+    if *offset + 11 > data.len() {
+        return Err(Error::UnexpectedEOF);
+    }
     *offset += 1;
     let typ = try!(Type::parse(
         BigEndian::read_u16(&data[*offset..*offset+2])));
