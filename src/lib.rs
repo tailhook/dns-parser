@@ -1,4 +1,5 @@
 extern crate byteorder;
+#[macro_use(_tt_as_expr_hack)]
 #[macro_use(matches)] extern crate matches;
 #[macro_use(quick_error)] extern crate quick_error;
 
