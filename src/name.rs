@@ -11,7 +11,7 @@ use {Error};
 ///
 /// This is contains just a reference to a slice that contains the data.
 /// You may turn this into a string using `.to_string()`
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 pub struct Name<'a>{
     labels: &'a [u8],
     /// This is the original buffer size. The compressed names in original
@@ -27,8 +27,8 @@ impl<'a> Name<'a> {
         if parse_data.len() <= pos {
             return Err(Error::UnexpectedEOF);
         }
-        // By setting the largest_pos to be the original len, a side effect is that the pos
-        // variable can move forwards in the buffer once.
+        // By setting the largest_pos to be the original len, a side effect
+        // is that the pos variable can move forwards in the buffer once.
         let mut largest_pos = original.len();
         let mut byte = parse_data[pos];
         while byte != 0 {
@@ -44,13 +44,15 @@ impl<'a> Name<'a> {
                 if off >= original.len() {
                     return Err(Error::UnexpectedEOF);
                 }
-                // Set the value for return_pos which is the pos in the original data buffer
-                // that should be used to return after validating the offsetted labels.
+                // Set value for return_pos which is the pos in the original
+                // data buffer that should be used to return after validating
+                // the offsetted labels.
                 if let None = return_pos {
                     return_pos = Some(pos);
                 }
 
-                // Check then set largest_pos to ensure we never go backwards in the buffer.
+                // Check then set largest_pos to ensure we never go backwards
+                // in the buffer.
                 if off >= largest_pos {
                     return Err(Error::BadPointer);
                 }
@@ -75,9 +77,9 @@ impl<'a> Name<'a> {
             byte = parse_data[pos];
         }
         if let Some(return_pos) = return_pos {
-            return Ok(Name { labels: &data[..return_pos+2], original: original });
+            return Ok(Name {labels: &data[..return_pos+2], original: original});
         } else {
-            return Ok(Name { labels: &data[..pos+1], original: original });
+            return Ok(Name {labels: &data[..pos+1], original: original });
         }
     }
     pub fn byte_len(&self) -> usize {
@@ -124,18 +126,23 @@ mod test {
 
     #[test]
     fn parse_badpointer_same_offset() {
-        // A buffer where an offset points to itself, a bad compression pointer.
-        let buffer_same_offset = vec![192, 2, 192, 2];
+        // A buffer where an offset points to itself,
+        // which is a bad compression pointer.
+        let same_offset = vec![192, 2, 192, 2];
+        let is_match = matches!(Name::scan(&same_offset, &same_offset),
+                                Err(Error::BadPointer));
 
-        assert_eq!(Name::scan(&buffer_same_offset, &buffer_same_offset), Err(Error::BadPointer));
+        assert!(is_match);
     }
 
     #[test]
     fn parse_badpointer_forward_offset() {
-        // A buffer where the offsets points back to each other which would cause infinite recursion
-        // if never checked, a bad compression pointer.
-        let buffer_forwards_offset = vec![192, 2, 192, 4, 192, 2];
+        // A buffer where the offsets points back to each other which causes
+        // infinite recursion if never checked, a bad compression pointer.
+        let forwards_offset = vec![192, 2, 192, 4, 192, 2];
+        let is_match = matches!(Name::scan(&forwards_offset, &forwards_offset),
+                                Err(Error::BadPointer));
 
-        assert_eq!(Name::scan(&buffer_forwards_offset, &buffer_forwards_offset), Err(Error::BadPointer));
+        assert!(is_match);
     }
 }
