@@ -3,7 +3,7 @@ quick_error! {
     #[derive(Debug)]
     pub enum Error {
         BadPointer {
-            description("invalid compression pointer not pointing backwards
+            description("invalid compression pointer not pointing backwards \
                          when parsing label")
         }
         HeaderTooShort {
