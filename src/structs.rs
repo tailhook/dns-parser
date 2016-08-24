@@ -9,6 +9,11 @@ pub struct Packet<'a> {
     pub answers: Vec<ResourceRecord<'a>>,
     pub nameservers: Vec<ResourceRecord<'a>>,
     pub additional: Vec<ResourceRecord<'a>>,
+    /// Optional Pseudo-RR
+    /// When present it is sent as an RR in the additional section. In this RR
+    /// the `class` and `ttl` fields store max udp packet size and flags
+    /// respectively. To keep `ResourceRecord` clean we store the OPT record
+    /// here.
     pub opt: Option<OptRecord<'a>>,
 }
 
