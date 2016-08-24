@@ -43,5 +43,8 @@ quick_error! {
         WrongState {
             description("parser is in the wrong state")
         }
+        AdditionalOPT {
+            description("additional OPT record found")
+        }
     }
 }

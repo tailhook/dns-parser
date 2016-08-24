@@ -9,6 +9,12 @@ pub struct Packet<'a> {
     pub answers: Vec<ResourceRecord<'a>>,
     pub nameservers: Vec<ResourceRecord<'a>>,
     pub additional: Vec<ResourceRecord<'a>>,
+    /// Optional Pseudo-RR
+    /// When present it is sent as an RR in the additional section. In this RR
+    /// the `class` and `ttl` fields store max udp packet size and flags
+    /// respectively. To keep `ResourceRecord` clean we store the OPT record
+    /// here.
+    pub opt: Option<OptRecord<'a>>,
 }
 
 /// A parsed chunk of data in the Query section of the packet
@@ -29,6 +35,16 @@ pub struct ResourceRecord<'a> {
     pub name: Name<'a>,
     pub cls: Class,
     pub ttl: u32,
+    pub data: RRData<'a>,
+}
+
+/// RFC 6891 OPT RR
+#[derive(Debug)]
+pub struct OptRecord<'a> {
+    pub udp: u16,
+    pub extrcode: u8,
+    pub version: u8,
+    pub flags: u16,
     pub data: RRData<'a>,
 }
 

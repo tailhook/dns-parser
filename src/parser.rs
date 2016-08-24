@@ -3,8 +3,9 @@ use std::i32;
 use byteorder::{BigEndian, ByteOrder};
 
 use {Header, Packet, Error, Question, Name, QueryType, QueryClass};
-use {Type, Class, ResourceRecord, RRData};
+use {Type, Class, ResourceRecord, OptRecord, RRData};
 
+const OPT_RR_START: [u8; 3] = [0, 0, 41];
 
 impl<'a> Packet<'a> {
     pub fn parse(data: &[u8]) -> Result<Packet, Error> {
@@ -38,8 +39,17 @@ impl<'a> Packet<'a> {
             nameservers.push(try!(parse_record(data, &mut offset)));
         }
         let mut additional = Vec::with_capacity(header.additional as usize);
+        let mut opt = None;
         for _ in 0..header.additional {
-            additional.push(try!(parse_record(data, &mut offset)));
+            if offset + 3 <= data.len() && data[offset..offset+3] == OPT_RR_START {
+                if opt.is_none() {
+                    opt = Some(try!(parse_opt_record(data, &mut offset)));
+                } else {
+                    return Err(Error::AdditionalOPT);
+                }
+            } else {
+                additional.push(try!(parse_record(data, &mut offset)));
+            }
         }
         Ok(Packet {
             header: header,
@@ -47,6 +57,7 @@ impl<'a> Packet<'a> {
             answers: answers,
             nameservers: nameservers,
             additional: additional,
+            opt: opt,
         })
     }
 }
@@ -81,6 +92,44 @@ fn parse_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<ResourceRecord
         name: name,
         cls: cls,
         ttl: ttl,
+        data: data,
+    })
+}
+
+// Function to parse an RFC 6891 OPT Pseudo RR
+fn parse_opt_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<OptRecord<'a>, Error> {
+    if *offset + 11 > data.len() {
+        return Err(Error::UnexpectedEOF);
+    }
+    *offset += 1;
+    let typ = try!(Type::parse(
+        BigEndian::read_u16(&data[*offset..*offset+2])));
+    if typ != Type::OPT {
+        return Err(Error::InvalidType(typ as u16));
+    }
+    *offset += 2;
+    let udp = BigEndian::read_u16(&data[*offset..*offset+2]);
+    *offset += 2;
+    let extrcode = data[*offset];
+    *offset += 1;
+    let version = data[*offset];
+    *offset += 1;
+    let flags = BigEndian::read_u16(&data[*offset..*offset+2]);
+    *offset += 2;
+    let rdlen = BigEndian::read_u16(&data[*offset..*offset+2]) as usize;
+    *offset += 2;
+    if *offset + rdlen > data.len() {
+        return Err(Error::UnexpectedEOF);
+    }
+    let data = try!(RRData::parse(typ,
+        &data[*offset..*offset+rdlen], data));
+    *offset += rdlen;
+
+    Ok(OptRecord {
+        udp: udp,
+        extrcode: extrcode,
+        version: version,
+        flags: flags,
         data: data,
     })
 }
@@ -677,6 +726,44 @@ mod test {
                 }
                 ref x => panic!("Wrong rdata {:?}", x),
             }
+        }
+    }
+
+    #[test]
+    fn parse_example_query_edns() {
+        let query = b"\x95\xce\x01\x00\x00\x01\x00\x00\x00\x00\x00\x01\
+            \x06google\x03com\x00\x00\x01\x00\
+            \x01\x00\x00\x29\x10\x00\x00\x00\x00\x00\x00\x00";
+        let packet = Packet::parse(query).unwrap();
+        assert_eq!(packet.header, Header {
+            id: 38350,
+            query: true,
+            opcode: StandardQuery,
+            authoritative: false,
+            truncated: false,
+            recursion_desired: true,
+            recursion_available: false,
+            authenticated_data: false,
+            checking_disabled: false,
+            response_code: NoError,
+            questions: 1,
+            answers: 0,
+            nameservers: 0,
+            additional: 1,
+        });
+        assert_eq!(packet.questions.len(), 1);
+        assert_eq!(packet.questions[0].qtype, QT::A);
+        assert_eq!(packet.questions[0].qclass, QC::IN);
+        assert_eq!(&packet.questions[0].qname.to_string()[..], "google.com");
+        assert_eq!(packet.answers.len(), 0);
+        match packet.opt {
+            Some(opt) => {
+                assert_eq!(opt.udp, 4096);
+                assert_eq!(opt.extrcode, 0);
+                assert_eq!(opt.version, 0);
+                assert_eq!(opt.flags, 0);
+            },
+            None => panic!("Missing OPT RR")
         }
     }
 }
