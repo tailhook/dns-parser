@@ -145,4 +145,23 @@ mod test {
 
         assert!(is_match);
     }
+
+    #[test]
+    fn nested_names() {
+        // A buffer where an offset points to itself, a bad compression pointer.
+        let buf = b"\x02xx\x00\x02yy\xc0\x00\x02zz\xc0\x04";
+
+        assert_eq!(Name::scan(&buf[..], buf).unwrap().to_string(),
+            "xx");
+        assert_eq!(Name::scan(&buf[..], buf).unwrap().labels,
+            b"\x02xx\x00");
+        assert_eq!(Name::scan(&buf[4..], buf).unwrap().to_string(),
+            "yy.xx");
+        assert_eq!(Name::scan(&buf[4..], buf).unwrap().labels,
+            b"\x02yy\xc0\x00");
+        assert_eq!(Name::scan(&buf[9..], buf).unwrap().to_string(),
+            "zz.yy.xx");
+        assert_eq!(Name::scan(&buf[9..], buf).unwrap().labels,
+            b"\x02zz\xc0\x04");
+    }
 }
