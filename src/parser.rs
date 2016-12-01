@@ -21,12 +21,15 @@ impl<'a> Packet<'a> {
             let qtype = try!(QueryType::parse(
                 BigEndian::read_u16(&data[offset..offset+2])));
             offset += 2;
-            let qclass = try!(QueryClass::parse(
+
+            let (prefer_unicast, qclass) = try!(parse_qclass_code(
                 BigEndian::read_u16(&data[offset..offset+2])));
             offset += 2;
+
             questions.push(Question {
                 qname: name,
                 qtype: qtype,
+                prefer_unicast: prefer_unicast,
                 qclass: qclass,
             });
         }
@@ -62,6 +65,22 @@ impl<'a> Packet<'a> {
     }
 }
 
+fn parse_qclass_code(value: u16) -> Result<(bool, QueryClass), Error> {
+    let prefer_unicast = value & 0x8000 == 0x8000;
+    let qclass_code = value & 0x7FFF;
+
+    let qclass = try!(QueryClass::parse(qclass_code));
+    Ok((prefer_unicast, qclass))
+}
+
+fn parse_class_code(value: u16) -> Result<(bool, Class), Error> {
+    let is_unique = value & 0x8000 == 0x8000;
+    let class_code = value & 0x7FFF;
+
+    let cls = try!(Class::parse(class_code));
+    Ok((is_unique, cls))
+}
+
 // Generic function to parse answer, nameservers, and additional records.
 fn parse_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<ResourceRecord<'a>, Error> {
     let name = try!(Name::scan(&data[*offset..], data));
@@ -72,9 +91,11 @@ fn parse_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<ResourceRecord
     let typ = try!(Type::parse(
         BigEndian::read_u16(&data[*offset..*offset+2])));
     *offset += 2;
-    let cls = try!(Class::parse(
-        BigEndian::read_u16(&data[*offset..*offset+2])));
+
+    let class_code = BigEndian::read_u16(&data[*offset..*offset+2]);
+    let (multicast_unique, cls) = try!(parse_class_code(class_code));
     *offset += 2;
+
     let mut ttl = BigEndian::read_u32(&data[*offset..*offset+4]);
     if ttl > i32::MAX as u32 {
         ttl = 0;
@@ -90,6 +111,7 @@ fn parse_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<ResourceRecord
     *offset += rdlen;
     Ok(ResourceRecord {
         name: name,
+        multicast_unique: multicast_unique,
         cls: cls,
         ttl: ttl,
         data: data,
@@ -203,6 +225,7 @@ mod test {
         assert_eq!(&packet.questions[0].qname.to_string()[..], "example.com");
         assert_eq!(packet.answers.len(), 1);
         assert_eq!(&packet.answers[0].name.to_string()[..], "example.com");
+        assert_eq!(packet.answers[0].multicast_unique, false);
         assert_eq!(packet.answers[0].cls, C::IN);
         assert_eq!(packet.answers[0].ttl, 1272);
         match packet.answers[0].data {
@@ -211,6 +234,19 @@ mod test {
             }
             ref x => panic!("Wrong rdata {:?}", x),
         }
+    }
+
+    #[test]
+    fn parse_response_with_multicast_unique() {
+        let response = b"\x06%\x81\x80\x00\x01\x00\x01\x00\x00\x00\x00\
+                         \x07example\x03com\x00\x00\x01\x00\x01\
+                         \xc0\x0c\x00\x01\x80\x01\x00\x00\x04\xf8\
+                         \x00\x04]\xb8\xd8\"";
+        let packet = Packet::parse(response).unwrap();
+
+        assert_eq!(packet.answers.len(), 1);
+        assert_eq!(packet.answers[0].multicast_unique, true);
+        assert_eq!(packet.answers[0].cls, C::IN);
     }
 
     #[test]
@@ -300,6 +336,7 @@ mod test {
           assert_eq!(packet.nameservers.len(), 1);
           assert_eq!(&packet.nameservers[0].name.to_string()[..], "youtube.com");
           assert_eq!(packet.nameservers[0].cls, C::IN);
+          assert_eq!(packet.nameservers[0].multicast_unique, false);
           assert_eq!(packet.nameservers[0].ttl, 10800);
           match packet.nameservers[0].data {
               RRData::SOA(ref soa_rec) => {
@@ -499,9 +536,22 @@ mod test {
         assert_eq!(packet.questions.len(), 1);
         assert_eq!(packet.questions[0].qtype, QT::SRV);
         assert_eq!(packet.questions[0].qclass, QC::IN);
+        assert_eq!(packet.questions[0].prefer_unicast, false);
         assert_eq!(&packet.questions[0].qname.to_string()[..],
             "_xmpp-server._tcp.gmail.com");
         assert_eq!(packet.answers.len(), 0);
+    }
+
+    #[test]
+    fn parse_multicast_prefer_unicast_query() {
+        let query = b"\x06%\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\
+                      \x07example\x03com\x00\x00\x01\x80\x01";
+        let packet = Packet::parse(query).unwrap();
+
+        assert_eq!(packet.questions.len(), 1);
+        assert_eq!(packet.questions[0].qtype, QT::A);
+        assert_eq!(packet.questions[0].qclass, QC::IN);
+        assert_eq!(packet.questions[0].prefer_unicast, true);
     }
 
     #[test]
