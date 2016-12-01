@@ -21,6 +21,9 @@ pub struct Packet<'a> {
 #[derive(Debug)]
 pub struct Question<'a> {
     pub qname: Name<'a>,
+    /// Whether or not we prefer unicast responses.
+    /// This is used in multicast DNS.
+    pub prefer_unicast: bool,
     pub qtype: QueryType,
     pub qclass: QueryClass,
 }
@@ -33,6 +36,10 @@ pub struct Question<'a> {
 #[derive(Debug)]
 pub struct ResourceRecord<'a> {
     pub name: Name<'a>,
+    /// Whether or not the set of resource records is fully contained in the
+    /// packet, or whether there will be more resource records in future
+    /// packets. Only used for multicast DNS.
+    pub multicast_unique: bool,
     pub cls: Class,
     pub ttl: u32,
     pub data: RRData<'a>,
