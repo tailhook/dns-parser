@@ -1,3 +1,5 @@
+use std::str::Utf8Error;
+
 quick_error! {
     /// Error parsing DNS packet
     #[derive(Debug)]
@@ -39,6 +41,10 @@ quick_error! {
         }
         LabelIsNotAscii {
             description("invalid characters encountered while reading label")
+        }
+        TxtDataIsNotUTF8(error: Utf8Error) {
+            description("invalid characters encountered while reading TXT")
+            display("{:?}", error)
         }
         WrongState {
             description("parser is in the wrong state")
