@@ -1,5 +1,5 @@
 extern crate byteorder;
-#[macro_use] extern crate matches;
+#[cfg(test)] #[macro_use] extern crate matches;
 #[macro_use(quick_error)] extern crate quick_error;
 
 mod enums;
