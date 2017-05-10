@@ -3,7 +3,7 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 use byteorder::{BigEndian, ByteOrder};
 
 use {Name, Type, Error, SoaRecord};
-
+use std::str;
 
 /// The enumeration that represents known types of DNS resource records data
 #[derive(Debug)]
@@ -16,6 +16,7 @@ pub enum RRData<'a> {
     SOA(SoaRecord<'a>),
     PTR(Name<'a>),
     MX { preference: u16, exchange: Name<'a> },
+    TXT(String),
     // Anything that can't be parsed yet
     Unknown(&'a [u8]),
 }
@@ -94,6 +95,27 @@ impl<'a> RRData<'a> {
                     port: BigEndian::read_u16(&rdata[4..6]),
                     target: try!(Name::scan(&rdata[6..], original)),
                 })
+            }
+            Type::TXT => {
+                let len = rdata.len();
+                if len < 1 {
+                    return Err(Error::WrongRdataLength);
+                }
+                let mut ret_string = String::new();
+                let mut pos = 0;
+                while pos < len {
+                    let rdlen = rdata[pos] as usize;
+                    pos += 1;
+                    if len < rdlen + pos {
+                        return Err(Error::WrongRdataLength);
+                    }
+                    match str::from_utf8(&rdata[pos..(pos+rdlen)]) {
+                        Ok(val) => ret_string.push_str(val),
+                        Err(e) => return Err(Error::TxtDataIsNotUTF8(e)),
+                    }
+                    pos += rdlen;
+                }
+                Ok(RRData::TXT(ret_string))
             }
             _ => {
                 Ok(RRData::Unknown(rdata))
