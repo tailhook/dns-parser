@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `RRData` enum in crate `dns_parser`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, RRData">
+
+    <title>dns_parser::RRData - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc enum">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Enum RRData</p><div class="block items"><ul><li><a href="#variants">Variants</a></li><li><a href="#methods">Methods</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>dns_parser</a></p><script>window.sidebarCurrent = {name: 'RRData', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Enum <a href='index.html'>dns_parser</a>::<wbr><a class="enum" href=''>RRData</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/dns_parser/rrdata.rs.html#10-22' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum RRData&lt;'a&gt; {
+    CNAME(<a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;),
+    NS(<a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;),
+    A(<a class="struct" href="https://doc.rust-lang.org/nightly/std/net/ip/struct.Ipv4Addr.html" title="struct std::net::ip::Ipv4Addr">Ipv4Addr</a>),
+    AAAA(<a class="struct" href="https://doc.rust-lang.org/nightly/std/net/ip/struct.Ipv6Addr.html" title="struct std::net::ip::Ipv6Addr">Ipv6Addr</a>),
+    SRV {
+        priority: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u16.html">u16</a>,
+        weight: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u16.html">u16</a>,
+        port: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u16.html">u16</a>,
+        target: <a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;,
+    },
+    SOA(<a class="struct" href="../dns_parser/struct.SoaRecord.html" title="struct dns_parser::SoaRecord">SoaRecord</a>&lt;'a&gt;),
+    PTR(<a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;),
+    MX {
+        preference: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u16.html">u16</a>,
+        exchange: <a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;,
+    },
+    TXT(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>),
+    Unknown(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;'a [</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>),
+}</pre><div class='docblock'><p>The enumeration that represents known types of DNS resource records data</p>
+</div><h2 id='variants' class='variants small-section-header'>
+                   Variants<a href='#variants' class='anchor'></a></h2>
+<span id='variant.CNAME' class='variant'><span id='CNAME.v' class='invisible'><code>CNAME(<a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;)</code></span></span><span id='variant.NS' class='variant'><span id='NS.v' class='invisible'><code>NS(<a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;)</code></span></span><span id='variant.A' class='variant'><span id='A.v' class='invisible'><code>A(<a class="struct" href="https://doc.rust-lang.org/nightly/std/net/ip/struct.Ipv4Addr.html" title="struct std::net::ip::Ipv4Addr">Ipv4Addr</a>)</code></span></span><span id='variant.AAAA' class='variant'><span id='AAAA.v' class='invisible'><code>AAAA(<a class="struct" href="https://doc.rust-lang.org/nightly/std/net/ip/struct.Ipv6Addr.html" title="struct std::net::ip::Ipv6Addr">Ipv6Addr</a>)</code></span></span><span id='variant.SRV' class='variant'><span id='SRV.v' class='invisible'><code>SRV</code></span></span><span class='docblock autohide sub-variant' id='variant.SRV.fields'><h3 class='fields'>Fields of <code>SRV</code></h3>
+
+                           <table><tr><td id='variant.SRV.field.priority'><span id='SRV.v.priority.v' class='invisible'><code>priority:&nbsp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u16.html">u16</a></code></span></td><td></td></tr><tr><td id='variant.SRV.field.weight'><span id='SRV.v.weight.v' class='invisible'><code>weight:&nbsp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u16.html">u16</a></code></span></td><td></td></tr><tr><td id='variant.SRV.field.port'><span id='SRV.v.port.v' class='invisible'><code>port:&nbsp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u16.html">u16</a></code></span></td><td></td></tr><tr><td id='variant.SRV.field.target'><span id='SRV.v.target.v' class='invisible'><code>target:&nbsp;<a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;</code></span></td><td></td></tr></table></span><span id='variant.SOA' class='variant'><span id='SOA.v' class='invisible'><code>SOA(<a class="struct" href="../dns_parser/struct.SoaRecord.html" title="struct dns_parser::SoaRecord">SoaRecord</a>&lt;'a&gt;)</code></span></span><span id='variant.PTR' class='variant'><span id='PTR.v' class='invisible'><code>PTR(<a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;)</code></span></span><span id='variant.MX' class='variant'><span id='MX.v' class='invisible'><code>MX</code></span></span><span class='docblock autohide sub-variant' id='variant.MX.fields'><h3 class='fields'>Fields of <code>MX</code></h3>
+
+                           <table><tr><td id='variant.MX.field.preference'><span id='MX.v.preference.v' class='invisible'><code>preference:&nbsp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u16.html">u16</a></code></span></td><td></td></tr><tr><td id='variant.MX.field.exchange'><span id='MX.v.exchange.v' class='invisible'><code>exchange:&nbsp;<a class="struct" href="../dns_parser/struct.Name.html" title="struct dns_parser::Name">Name</a>&lt;'a&gt;</code></span></td><td></td></tr></table></span><span id='variant.TXT' class='variant'><span id='TXT.v' class='invisible'><code>TXT(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>)</code></span></span><span id='variant.Unknown' class='variant'><span id='Unknown.v' class='invisible'><code>Unknown(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;'a [</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>)</code></span></span>
+                    <h2 id='methods' class='small-section-header'>
+                      Methods<a href='#methods' class='anchor'></a>
+                    </h2>
+                <h3 id='impl' class='impl'><span class='in-band'><code>impl&lt;'a&gt; <a class="enum" href="../dns_parser/enum.RRData.html" title="enum dns_parser::RRData">RRData</a>&lt;'a&gt;</code><a href='#impl' class='anchor'></a></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/dns_parser/rrdata.rs.html#24-125' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.parse' class="method"><span id='parse.v' class='invisible'><code>fn <a href='#method.parse' class='fnname'>parse</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;typ: <a class="enum" href="../dns_parser/enum.Type.html" title="enum dns_parser::Type">Type</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;rdata: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;'a [</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;original: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;'a [</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="../dns_parser/enum.RRData.html" title="enum dns_parser::RRData">RRData</a>&lt;'a&gt;, <a class="enum" href="../dns_parser/enum.Error.html" title="enum dns_parser::Error">Error</a>&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/dns_parser/rrdata.rs.html#25-124' title='goto source code'>[src]</a></span></h4>
+</div>
+            <h2 id='implementations' class='small-section-header'>
+              Trait Implementations<a href='#implementations' class='anchor'></a>
+            </h2>
+        <h3 id='impl-Debug' class='impl'><span class='in-band'><code>impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="enum" href="../dns_parser/enum.RRData.html" title="enum dns_parser::RRData">RRData</a>&lt;'a&gt;</code><a href='#impl-Debug' class='anchor'></a></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/dns_parser/rrdata.rs.html#9' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class="method"><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/dns_parser/rrdata.rs.html#9' title='goto source code'>[src]</a></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "dns_parser";
+    </script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
