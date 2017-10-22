@@ -1,9 +1,10 @@
-==========
 DNS Parser
 ==========
 
-:Status: Beta
-:Documentation: http://tailhook.github.io/dns-parser
+*Status: beta*
+[Documentation](https://docs.rs/dns-parser) |
+[Github](https://github.com/tailhook/dns-parser) |
+[Crate](https://crates.io/crates/dns-parser)
 
 This is a parser of DNS protocol packets that is independent of any networking
 code.
