@@ -6,6 +6,7 @@ use {Opcode, ResponseCode, Header, QueryType, QueryClass};
 ///
 /// Both query and answer packets may be built with this interface, although,
 /// much of functionality is not implemented yet.
+#[derive(Debug)]
 pub struct Builder {
     buf: Vec<u8>,
 }

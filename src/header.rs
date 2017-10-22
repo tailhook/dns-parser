@@ -17,6 +17,7 @@ mod flag {
 
 /// Represents parsed header of the packet
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[allow(missing_docs)] // fields are from the spec I think
 pub struct Header {
     pub id: u16,
     pub query: bool,
@@ -35,6 +36,7 @@ pub struct Header {
 }
 
 impl Header {
+    /// Parse the header into a header structure
     pub fn parse(data: &[u8]) -> Result<Header, Error> {
         if data.len() < 12 {
             return Err(Error::HeaderTooShort);
@@ -87,10 +89,13 @@ impl Header {
         BigEndian::write_u16(&mut data[8..10], self.nameservers);
         BigEndian::write_u16(&mut data[10..12], self.additional);
     }
+    /// Set "truncated flag" in the raw data
+    // shouldn't this method be non-public?
     pub fn set_truncated(data: &mut [u8]) {
         let oldflags = BigEndian::read_u16(&data[2..4]);
         BigEndian::write_u16(&mut data[2..4], oldflags & flag::TRUNCATED);
     }
+    /// Returns a size of the header (always 12 bytes)
     pub fn size() -> usize { 12 }
 }
 

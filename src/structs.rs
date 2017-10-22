@@ -3,6 +3,7 @@ use {QueryType, QueryClass, Name, Class, Header, RRData};
 
 /// Parsed DNS packet
 #[derive(Debug)]
+#[allow(missing_docs)]  // should be covered by spec
 pub struct Packet<'a> {
     pub header: Header,
     pub questions: Vec<Question<'a>>,
@@ -19,6 +20,7 @@ pub struct Packet<'a> {
 
 /// A parsed chunk of data in the Query section of the packet
 #[derive(Debug)]
+#[allow(missing_docs)]  // should be covered by spec
 pub struct Question<'a> {
     pub qname: Name<'a>,
     /// Whether or not we prefer unicast responses.
@@ -34,6 +36,7 @@ pub struct Question<'a> {
 /// limited we have some types of packets which are parsed and other provided
 /// as unparsed slice of bytes.
 #[derive(Debug)]
+#[allow(missing_docs)]  // should be covered by spec
 pub struct ResourceRecord<'a> {
     pub name: Name<'a>,
     /// Whether or not the set of resource records is fully contained in the
@@ -47,6 +50,7 @@ pub struct ResourceRecord<'a> {
 
 /// RFC 6891 OPT RR
 #[derive(Debug)]
+#[allow(missing_docs)]  // should be covered by spec
 pub struct OptRecord<'a> {
     pub udp: u16,
     pub extrcode: u8,
@@ -55,7 +59,9 @@ pub struct OptRecord<'a> {
     pub data: RRData<'a>,
 }
 
+/// The SOA (Start of Authority) record
 #[derive(Debug)]
+#[allow(missing_docs)]  // should be covered by spec
 pub struct SoaRecord<'a> {
     pub primary_ns: Name<'a>,
     pub mailbox: Name<'a>,

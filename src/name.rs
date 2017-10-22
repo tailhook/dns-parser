@@ -20,6 +20,11 @@ pub struct Name<'a>{
 }
 
 impl<'a> Name<'a> {
+    /// Scan the data to get Name object
+    ///
+    /// The `data` should be a part of `original` where name should start.
+    /// The `original` is the data starting a the start of a packet, so
+    /// that offsets in compressed name starts from the `original`.
     pub fn scan(data: &'a[u8], original: &'a[u8]) -> Result<Name<'a>, Error> {
         let mut parse_data = data;
         let mut return_pos = None;
@@ -82,6 +87,7 @@ impl<'a> Name<'a> {
             return Ok(Name {labels: &data[..pos+1], original: original });
         }
     }
+    /// Number of bytes serialized name occupies
     pub fn byte_len(&self) -> usize {
         self.labels.len()
     }

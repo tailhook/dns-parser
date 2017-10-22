@@ -7,6 +7,7 @@ use std::str;
 
 /// The enumeration that represents known types of DNS resource records data
 #[derive(Debug)]
+#[allow(missing_docs)] // resource records are pretty self-descriptive
 pub enum RRData<'a> {
     CNAME(Name<'a>),
     NS(Name<'a>),
@@ -17,11 +18,12 @@ pub enum RRData<'a> {
     PTR(Name<'a>),
     MX { preference: u16, exchange: Name<'a> },
     TXT(String),
-    // Anything that can't be parsed yet
+    /// Anything that can't be parsed yet
     Unknown(&'a [u8]),
 }
 
 impl<'a> RRData<'a> {
+    /// Parse an RR data and return RRData enumeration
     pub fn parse(typ: Type, rdata: &'a [u8], original: &'a [u8])
         -> Result<RRData<'a>, Error>
     {

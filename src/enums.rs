@@ -126,14 +126,19 @@ pub enum QueryClass {
 /// The OPCODE value according to RFC 1035
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Opcode {
+    /// Normal query
     StandardQuery,
+    /// Inverse query (query a name by IP)
     InverseQuery,
+    /// Server status request
     ServerStatusRequest,
+    /// Reserved opcode for future use
     Reserved(u16),
 }
 
 /// The RCODE value according to RFC 1035
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[allow(missing_docs)] // names are from spec
 pub enum ResponseCode {
     NoError,
     FormatError,
@@ -198,6 +203,7 @@ impl Into<u8> for ResponseCode {
 }
 
 impl QueryType {
+    /// Parse a query type code
     pub fn parse(code: u16) -> Result<QueryType, Error> {
         use self::QueryType::*;
         match code {
@@ -228,6 +234,7 @@ impl QueryType {
 }
 
 impl QueryClass {
+    /// Parse a query class code
     pub fn parse(code: u16) -> Result<QueryClass, Error> {
         use self::QueryClass::*;
         match code {
@@ -242,6 +249,7 @@ impl QueryClass {
 }
 
 impl Type {
+    /// Parse a type code
     pub fn parse(code: u16) -> Result<Type, Error> {
         use self::Type::*;
         match code {
@@ -269,6 +277,7 @@ impl Type {
 }
 
 impl Class {
+    /// Parse a class code
     pub fn parse(code: u16) -> Result<Class, Error> {
         use self::Class::*;
         match code {

@@ -8,6 +8,8 @@ use {Type, Class, ResourceRecord, OptRecord, RRData};
 const OPT_RR_START: [u8; 3] = [0, 0, 41];
 
 impl<'a> Packet<'a> {
+    /// Parse a full DNS Packet and return a structure that has all the
+    /// data borrowed from the passed buffer.
     pub fn parse(data: &[u8]) -> Result<Packet, Error> {
         let header = try!(Header::parse(data));
         let mut offset = Header::size();
