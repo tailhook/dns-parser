@@ -13,10 +13,10 @@ authors = ["paul@colomiets.name"]
 
 [dependencies]
 quick-error = "1.0.0"
-byteorder = "0.4"
-matches = "0.1.2"
+byteorder = "1"
 
 [dev-dependencies]
+matches = "0.1.2"
 
 [lib]
 name = "dns_parser"
