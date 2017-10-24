@@ -9,7 +9,7 @@ use {Error};
 
 /// The DNS name as stored in the original packet
 ///
-/// This is contains just a reference to a slice that contains the data.
+/// This contains just a reference to a slice that contains the data.
 /// You may turn this into a string using `.to_string()`
 #[derive(Debug, Clone, Copy)]
 pub struct Name<'a>{
