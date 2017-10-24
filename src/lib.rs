@@ -25,13 +25,14 @@ mod name;
 mod parser;
 mod error;
 mod header;
-mod rrdata;
 mod builder;
 
+pub mod rdata;
+
 pub use enums::{Type, QueryType, Class, QueryClass, ResponseCode, Opcode};
-pub use structs::{Question, ResourceRecord, OptRecord, Packet, SoaRecord};
+pub use structs::{Question, ResourceRecord, Packet};
 pub use name::{Name};
 pub use error::{Error};
 pub use header::{Header};
-pub use rrdata::{RRData};
+pub use rdata::{RData};
 pub use builder::{Builder};
