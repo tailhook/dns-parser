@@ -1,4 +1,5 @@
-use {QueryType, QueryClass, Name, Class, Header, RRData};
+use {QueryType, QueryClass, Name, Class, Header, RData};
+use rdata::opt;
 
 
 /// Parsed DNS packet
@@ -15,7 +16,7 @@ pub struct Packet<'a> {
     /// the `class` and `ttl` fields store max udp packet size and flags
     /// respectively. To keep `ResourceRecord` clean we store the OPT record
     /// here.
-    pub opt: Option<OptRecord<'a>>,
+    pub opt: Option<opt::Record<'a>>,
 }
 
 /// A parsed chunk of data in the Query section of the packet
@@ -45,29 +46,5 @@ pub struct ResourceRecord<'a> {
     pub multicast_unique: bool,
     pub cls: Class,
     pub ttl: u32,
-    pub data: RRData<'a>,
-}
-
-/// RFC 6891 OPT RR
-#[derive(Debug)]
-#[allow(missing_docs)]  // should be covered by spec
-pub struct OptRecord<'a> {
-    pub udp: u16,
-    pub extrcode: u8,
-    pub version: u8,
-    pub flags: u16,
-    pub data: RRData<'a>,
-}
-
-/// The SOA (Start of Authority) record
-#[derive(Debug)]
-#[allow(missing_docs)]  // should be covered by spec
-pub struct SoaRecord<'a> {
-    pub primary_ns: Name<'a>,
-    pub mailbox: Name<'a>,
-    pub serial: u32,
-    pub refresh: u32,
-    pub retry: u32,
-    pub expire: u32,
-    pub minimum_ttl: u32,
+    pub data: RData<'a>,
 }

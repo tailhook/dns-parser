@@ -1,4 +1,5 @@
 use {Error};
+use rdata::*;
 
 /// The TYPE value according to RFC 1035
 ///
@@ -6,41 +7,43 @@ use {Error};
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Type {
     /// a host addresss
-    A = 1,
+    A = a::TYPE,
     /// an authoritative name server
-    NS = 2,
+    NS = ns::TYPE,
     /// a mail forwarder (Obsolete - use MX)
-    MF = 4,
+    MF = mf::TYPE,
     /// the canonical name for an alias
-    CNAME = 5,
+    CNAME = cname::TYPE,
     /// marks the start of a zone of authority
-    SOA = 6,
+    SOA = soa::TYPE,
     /// a mailbox domain name (EXPERIMENTAL)
-    MB = 7,
+    MB = mb::TYPE,
     /// a mail group member (EXPERIMENTAL)
-    MG = 8,
+    MG = mg::TYPE,
     /// a mail rename domain name (EXPERIMENTAL)
-    MR = 9,
+    MR = mr::TYPE,
     /// a null RR (EXPERIMENTAL)
-    NULL = 10,
+    NULL = null::TYPE,
     /// a well known service description
-    WKS = 11,
+    WKS = wks::TYPE,
     /// a domain name pointer
-    PTR = 12,
+    PTR = ptr::TYPE,
     /// host information
-    HINFO = 13,
+    HINFO = hinfo::TYPE,
     /// mailbox or mail list information
-    MINFO = 14,
+    MINFO = minfo::TYPE,
     /// mail exchange
-    MX = 15,
+    MX = mx::TYPE,
     /// text strings
-    TXT = 16,
+    TXT = txt::TYPE,
     /// IPv6 host address (RFC 2782)
-    AAAA = 28,
+    AAAA = aaaa::TYPE,
     /// service record (RFC 2782)
-    SRV = 33,
+    SRV = srv::TYPE,
     /// EDNS0 options (RFC 6891)
-    OPT = 41,
+    OPT = opt::TYPE,
+    /// DNS certification authorisation (RFC 6844)
+    CAA = caa::TYPE,
 }
 
 /// The QTYPE value according to RFC 1035
@@ -49,47 +52,49 @@ pub enum Type {
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum QueryType {
     /// a host addresss
-    A = 1,
+    A = a::TYPE,
     /// an authoritative name server
-    NS = 2,
+    NS = ns::TYPE,
     /// a mail forwarder (Obsolete - use MX)
-    MF = 4,
+    MF = mf::TYPE,
     /// the canonical name for an alias
-    CNAME = 5,
+    CNAME = cname::TYPE,
     /// marks the start of a zone of authority
-    SOA = 6,
+    SOA = soa::TYPE,
     /// a mailbox domain name (EXPERIMENTAL)
-    MB = 7,
+    MB = mb::TYPE,
     /// a mail group member (EXPERIMENTAL)
-    MG = 8,
+    MG = mg::TYPE,
     /// a mail rename domain name (EXPERIMENTAL)
-    MR = 9,
+    MR = mr::TYPE,
     /// a null RR (EXPERIMENTAL)
-    NULL = 10,
+    NULL = null::TYPE,
     /// a well known service description
-    WKS = 11,
+    WKS = wks::TYPE,
     /// a domain name pointer
-    PTR = 12,
+    PTR = ptr::TYPE,
     /// host information
-    HINFO = 13,
+    HINFO = hinfo::TYPE,
     /// mailbox or mail list information
-    MINFO = 14,
+    MINFO = minfo::TYPE,
     /// mail exchange
-    MX = 15,
+    MX = mx::TYPE,
     /// text strings
-    TXT = 16,
+    TXT = txt::TYPE,
     /// IPv6 host address (RFC 2782)
-    AAAA = 28,
+    AAAA = aaaa::TYPE,
     /// service record (RFC 2782)
-    SRV = 33,
+    SRV = srv::TYPE,
     /// A request for a transfer of an entire zone
-    AXFR = 252,
+    AXFR = axfr::TYPE,
     /// A request for mailbox-related records (MB, MG or MR)
-    MAILB = 253,
+    MAILB = mailb::TYPE,
     /// A request for mail agent RRs (Obsolete - see MX)
-    MAILA = 254,
+    MAILA = maila::TYPE,
+    /// DNS certification authorisation (RFC 6844)
+    CAA = caa::TYPE,
     /// A request for all records
-    All = 255,
+    All = all::TYPE,
 }
 
 
@@ -176,14 +181,14 @@ impl From<u8> for ResponseCode {
     fn from(code: u8) -> ResponseCode {
         use self::ResponseCode::*;
         match code {
-            0      => NoError,
-            1      => FormatError,
-            2      => ServerFailure,
-            3      => NameError,
-            4      => NotImplemented,
-            5      => Refused,
-            6...15 => Reserved(code),
-            x => panic!("Invalid response code {}", x),
+            0       => NoError,
+            1       => FormatError,
+            2       => ServerFailure,
+            3       => NameError,
+            4       => NotImplemented,
+            5       => Refused,
+            6...15  => Reserved(code),
+            x       => panic!("Invalid response code {}", x),
         }
     }
 }
@@ -191,13 +196,13 @@ impl Into<u8> for ResponseCode {
     fn into(self) -> u8 {
         use self::ResponseCode::*;
         match self {
-            NoError => 0,
-            FormatError => 1,
-            ServerFailure => 2,
-            NameError => 3,
-            NotImplemented => 4,
-            Refused => 5,
-            Reserved(code) => code,
+            NoError         => 0,
+            FormatError     => 1,
+            ServerFailure   => 2,
+            NameError       => 3,
+            NotImplemented  => 4,
+            Refused         => 5,
+            Reserved(code)  => code,
         }
     }
 }
@@ -206,29 +211,30 @@ impl QueryType {
     /// Parse a query type code
     pub fn parse(code: u16) -> Result<QueryType, Error> {
         use self::QueryType::*;
-        match code {
-            1   => Ok(A),
-            2   => Ok(NS),
-            4   => Ok(MF),
-            5   => Ok(CNAME),
-            6   => Ok(SOA),
-            7   => Ok(MB),
-            8   => Ok(MG),
-            9   => Ok(MR),
-            10  => Ok(NULL),
-            11  => Ok(WKS),
-            12  => Ok(PTR),
-            13  => Ok(HINFO),
-            14  => Ok(MINFO),
-            15  => Ok(MX),
-            16  => Ok(TXT),
-            28  => Ok(AAAA),
-            33  => Ok(SRV),
-            252 => Ok(AXFR),
-            253 => Ok(MAILB),
-            254 => Ok(MAILA),
-            255 => Ok(All),
-            x => Err(Error::InvalidQueryType(x)),
+        match code as isize {
+            a::TYPE         => Ok(A),
+            ns::TYPE        => Ok(NS),
+            mf::TYPE        => Ok(MF),
+            cname::TYPE     => Ok(CNAME),
+            soa::TYPE       => Ok(SOA),
+            mb::TYPE        => Ok(MB),
+            mg::TYPE        => Ok(MG),
+            mr::TYPE        => Ok(MR),
+            null::TYPE      => Ok(NULL),
+            wks::TYPE       => Ok(WKS),
+            ptr::TYPE       => Ok(PTR),
+            hinfo::TYPE     => Ok(HINFO),
+            minfo::TYPE     => Ok(MINFO),
+            mx::TYPE        => Ok(MX),
+            txt::TYPE       => Ok(TXT),
+            aaaa::TYPE      => Ok(AAAA),
+            srv::TYPE       => Ok(SRV),
+            axfr::TYPE      => Ok(AXFR),
+            mailb::TYPE     => Ok(MAILB),
+            maila::TYPE     => Ok(MAILA),
+            caa::TYPE       => Ok(CAA),
+            all::TYPE       => Ok(All),
+            x               => Err(Error::InvalidQueryType(x as u16)),
         }
     }
 }
@@ -243,7 +249,7 @@ impl QueryClass {
             3   => Ok(CH),
             4   => Ok(HS),
             255 => Ok(Any),
-            x => Err(Error::InvalidQueryClass(x)),
+            x   => Err(Error::InvalidQueryClass(x)),
         }
     }
 }
@@ -252,26 +258,27 @@ impl Type {
     /// Parse a type code
     pub fn parse(code: u16) -> Result<Type, Error> {
         use self::Type::*;
-        match code {
-            1   => Ok(A),
-            2   => Ok(NS),
-            4   => Ok(MF),
-            5   => Ok(CNAME),
-            6   => Ok(SOA),
-            7   => Ok(MB),
-            8   => Ok(MG),
-            9   => Ok(MR),
-            10  => Ok(NULL),
-            11  => Ok(WKS),
-            12  => Ok(PTR),
-            13  => Ok(HINFO),
-            14  => Ok(MINFO),
-            15  => Ok(MX),
-            16  => Ok(TXT),
-            28  => Ok(AAAA),
-            33  => Ok(SRV),
-            41  => Ok(OPT),
-            x => Err(Error::InvalidType(x)),
+        match code as isize {
+            a::TYPE         => Ok(A),
+            ns::TYPE        => Ok(NS),
+            mf::TYPE        => Ok(MF),
+            cname::TYPE     => Ok(CNAME),
+            soa::TYPE       => Ok(SOA),
+            mb::TYPE        => Ok(MB),
+            mg::TYPE        => Ok(MG),
+            mr::TYPE        => Ok(MR),
+            null::TYPE      => Ok(NULL),
+            wks::TYPE       => Ok(WKS),
+            ptr::TYPE       => Ok(PTR),
+            hinfo::TYPE     => Ok(HINFO),
+            minfo::TYPE     => Ok(MINFO),
+            mx::TYPE        => Ok(MX),
+            txt::TYPE       => Ok(TXT),
+            aaaa::TYPE      => Ok(AAAA),
+            srv::TYPE       => Ok(SRV),
+            caa::TYPE       => Ok(CAA),
+            opt::TYPE       => Ok(OPT),
+            x               => Err(Error::InvalidType(x as u16)),
         }
     }
 }
@@ -285,7 +292,7 @@ impl Class {
             2   => Ok(CS),
             3   => Ok(CH),
             4   => Ok(HS),
-            x => Err(Error::InvalidClass(x)),
+            x   => Err(Error::InvalidClass(x)),
         }
     }
 }
