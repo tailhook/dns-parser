@@ -42,6 +42,8 @@ pub enum Type {
     SRV = srv::TYPE,
     /// EDNS0 options (RFC 6891)
     OPT = opt::TYPE,
+    /// DNS certification authorisation (RFC 6844)
+    CAA = caa::TYPE,
 }
 
 /// The QTYPE value according to RFC 1035
@@ -89,6 +91,8 @@ pub enum QueryType {
     MAILB = mailb::TYPE,
     /// A request for mail agent RRs (Obsolete - see MX)
     MAILA = maila::TYPE,
+    /// DNS certification authorisation (RFC 6844)
+    CAA = caa::TYPE,
     /// A request for all records
     All = all::TYPE,
 }
@@ -228,6 +232,7 @@ impl QueryType {
             axfr::TYPE      => Ok(AXFR),
             mailb::TYPE     => Ok(MAILB),
             maila::TYPE     => Ok(MAILA),
+            caa::TYPE       => Ok(CAA),
             all::TYPE       => Ok(All),
             x               => Err(Error::InvalidQueryType(x as u16)),
         }
@@ -271,6 +276,7 @@ impl Type {
             txt::TYPE       => Ok(TXT),
             aaaa::TYPE      => Ok(AAAA),
             srv::TYPE       => Ok(SRV),
+            caa::TYPE       => Ok(CAA),
             opt::TYPE       => Ok(OPT),
             x               => Err(Error::InvalidType(x as u16)),
         }

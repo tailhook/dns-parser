@@ -6,6 +6,7 @@ pub mod a;
 pub mod aaaa;
 pub mod all;
 pub mod axfr;
+pub mod caa;
 pub mod cname;
 pub mod hinfo;
 pub mod maila;
@@ -27,6 +28,7 @@ pub mod wks;
 
 pub use self::a::Record as A;
 pub use self::aaaa::Record as Aaaa;
+pub use self::caa::Record as Caa;
 pub use self::cname::Record as Cname;
 pub use self::mx::Record as Mx;
 pub use self::ns::Record as Ns;
@@ -43,6 +45,7 @@ use {Type, Error};
 pub enum RData<'a> {
     A(A),
     AAAA(Aaaa),
+    CAA(Caa),
     CNAME(Cname<'a>),
     MX(Mx<'a>),
     NS(Ns<'a>),
@@ -76,6 +79,7 @@ impl<'a> RData<'a> {
         match typ {
             Type::A         => A::parse(rdata),
             Type::AAAA      => Aaaa::parse(rdata),
+            Type::CAA       => Caa::parse_with_original(rdata, original),
             Type::CNAME     => Cname::parse_with_original(rdata, original),
             Type::NS        => Ns::parse_with_original(rdata, original),
             Type::MX        => Mx::parse_with_original(rdata, original),

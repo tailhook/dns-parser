@@ -26,7 +26,7 @@ mod test {
     use RData;
 
     #[test]
-    fn parse_ns_response() {
+    fn parse_response() {
         let response = b"\x4a\xf0\x81\x80\x00\x01\x00\x01\x00\x01\x00\x00\
                          \x03www\x05skype\x03com\x00\x00\x01\x00\x01\
                          \xc0\x0c\x00\x05\x00\x01\x00\x00\x0e\x10\
