@@ -1,3 +1,4 @@
 /.vagga
 /target
 /Cargo.lock
+/src/rdata/mod.rs
