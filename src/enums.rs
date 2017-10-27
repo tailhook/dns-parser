@@ -1,99 +1,4 @@
-use {Error};
-use rdata::Record;
-use rdata::*;
-
-/// The TYPE value according to RFC 1035
-///
-/// All "EXPERIMENTAL" markers here are from the RFC
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub enum Type {
-    /// a host addresss
-    A = a::Record::TYPE,
-    /// an authoritative name server
-    NS = ns::Record::TYPE,
-    /// a mail forwarder (Obsolete - use MX)
-    MF = mf::Record::TYPE,
-    /// the canonical name for an alias
-    CNAME = cname::Record::TYPE,
-    /// marks the start of a zone of authority
-    SOA = soa::Record::TYPE,
-    /// a mailbox domain name (EXPERIMENTAL)
-    MB = mb::Record::TYPE,
-    /// a mail group member (EXPERIMENTAL)
-    MG = mg::Record::TYPE,
-    /// a mail rename domain name (EXPERIMENTAL)
-    MR = mr::Record::TYPE,
-    /// a null RR (EXPERIMENTAL)
-    NULL = null::Record::TYPE,
-    /// a well known service description
-    WKS = wks::Record::TYPE,
-    /// a domain name pointer
-    PTR = ptr::Record::TYPE,
-    /// host information
-    HINFO = hinfo::Record::TYPE,
-    /// mailbox or mail list information
-    MINFO = minfo::Record::TYPE,
-    /// mail exchange
-    MX = mx::Record::TYPE,
-    /// text strings
-    TXT = txt::Record::TYPE,
-    /// IPv6 host address (RFC 2782)
-    AAAA = aaaa::Record::TYPE,
-    /// service record (RFC 2782)
-    SRV = srv::Record::TYPE,
-    /// EDNS0 options (RFC 6891)
-    OPT = opt::Record::TYPE,
-}
-
-/// The QTYPE value according to RFC 1035
-///
-/// All "EXPERIMENTAL" markers here are from the RFC
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub enum QueryType {
-    /// a host addresss
-    A = a::Record::TYPE,
-    /// an authoritative name server
-    NS = ns::Record::TYPE,
-    /// a mail forwarder (Obsolete - use MX)
-    MF = mf::Record::TYPE,
-    /// the canonical name for an alias
-    CNAME = cname::Record::TYPE,
-    /// marks the start of a zone of authority
-    SOA = soa::Record::TYPE,
-    /// a mailbox domain name (EXPERIMENTAL)
-    MB = mb::Record::TYPE,
-    /// a mail group member (EXPERIMENTAL)
-    MG = mg::Record::TYPE,
-    /// a mail rename domain name (EXPERIMENTAL)
-    MR = mr::Record::TYPE,
-    /// a null RR (EXPERIMENTAL)
-    NULL = null::Record::TYPE,
-    /// a well known service description
-    WKS = wks::Record::TYPE,
-    /// a domain name pointer
-    PTR = ptr::Record::TYPE,
-    /// host information
-    HINFO = hinfo::Record::TYPE,
-    /// mailbox or mail list information
-    MINFO = minfo::Record::TYPE,
-    /// mail exchange
-    MX = mx::Record::TYPE,
-    /// text strings
-    TXT = txt::Record::TYPE,
-    /// IPv6 host address (RFC 2782)
-    AAAA = aaaa::Record::TYPE,
-    /// service record (RFC 2782)
-    SRV = srv::Record::TYPE,
-    /// A request for a transfer of an entire zone
-    AXFR = axfr::Record::TYPE,
-    /// A request for mailbox-related records (MB, MG or MR)
-    MAILB = mailb::Record::TYPE,
-    /// A request for mail agent RRs (Obsolete - see MX)
-    MAILA = maila::Record::TYPE,
-    /// A request for all records
-    All = all::Record::TYPE,
-}
-
+use Error;
 
 /// The CLASS value according to RFC 1035
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -204,37 +109,6 @@ impl Into<u8> for ResponseCode {
     }
 }
 
-impl QueryType {
-    /// Parse a query type code
-    pub fn parse(code: u16) -> Result<QueryType, Error> {
-        use self::QueryType::*;
-        match code as isize {
-            a::Record::TYPE         => Ok(A),
-            ns::Record::TYPE        => Ok(NS),
-            mf::Record::TYPE        => Ok(MF),
-            cname::Record::TYPE     => Ok(CNAME),
-            soa::Record::TYPE       => Ok(SOA),
-            mb::Record::TYPE        => Ok(MB),
-            mg::Record::TYPE        => Ok(MG),
-            mr::Record::TYPE        => Ok(MR),
-            null::Record::TYPE      => Ok(NULL),
-            wks::Record::TYPE       => Ok(WKS),
-            ptr::Record::TYPE       => Ok(PTR),
-            hinfo::Record::TYPE     => Ok(HINFO),
-            minfo::Record::TYPE     => Ok(MINFO),
-            mx::Record::TYPE        => Ok(MX),
-            txt::Record::TYPE       => Ok(TXT),
-            aaaa::Record::TYPE      => Ok(AAAA),
-            srv::Record::TYPE       => Ok(SRV),
-            axfr::Record::TYPE      => Ok(AXFR),
-            mailb::Record::TYPE     => Ok(MAILB),
-            maila::Record::TYPE     => Ok(MAILA),
-            all::Record::TYPE       => Ok(All),
-            x               => Err(Error::InvalidQueryType(x as u16)),
-        }
-    }
-}
-
 impl QueryClass {
     /// Parse a query class code
     pub fn parse(code: u16) -> Result<QueryClass, Error> {
@@ -246,34 +120,6 @@ impl QueryClass {
             4   => Ok(HS),
             255 => Ok(Any),
             x   => Err(Error::InvalidQueryClass(x)),
-        }
-    }
-}
-
-impl Type {
-    /// Parse a type code
-    pub fn parse(code: u16) -> Result<Type, Error> {
-        use self::Type::*;
-        match code as isize {
-            a::Record::TYPE         => Ok(A),
-            ns::Record::TYPE        => Ok(NS),
-            mf::Record::TYPE        => Ok(MF),
-            cname::Record::TYPE     => Ok(CNAME),
-            soa::Record::TYPE       => Ok(SOA),
-            mb::Record::TYPE        => Ok(MB),
-            mg::Record::TYPE        => Ok(MG),
-            mr::Record::TYPE        => Ok(MR),
-            null::Record::TYPE      => Ok(NULL),
-            wks::Record::TYPE       => Ok(WKS),
-            ptr::Record::TYPE       => Ok(PTR),
-            hinfo::Record::TYPE     => Ok(HINFO),
-            minfo::Record::TYPE     => Ok(MINFO),
-            mx::Record::TYPE        => Ok(MX),
-            txt::Record::TYPE       => Ok(TXT),
-            aaaa::Record::TYPE      => Ok(AAAA),
-            srv::Record::TYPE       => Ok(SRV),
-            opt::Record::TYPE       => Ok(OPT),
-            x               => Err(Error::InvalidType(x as u16)),
         }
     }
 }

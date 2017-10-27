@@ -27,12 +27,14 @@ mod error;
 mod header;
 mod builder;
 
+/// Data types and methods for handling the RData field
+#[allow(missing_docs)] // resource records are pretty self-descriptive
 pub mod rdata;
 
-pub use enums::{Type, QueryType, Class, QueryClass, ResponseCode, Opcode};
+pub use enums::{Class, QueryClass, ResponseCode, Opcode};
 pub use structs::{Question, ResourceRecord, Packet};
 pub use name::{Name};
 pub use error::{Error};
 pub use header::{Header};
-pub use rdata::{RData};
+pub use rdata::{Type, QueryType, RData};
 pub use builder::{Builder};
