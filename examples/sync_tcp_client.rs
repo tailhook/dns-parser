@@ -7,7 +7,7 @@ use std::net::TcpStream;
 use std::process;
 
 
-use dns_parser::{Builder, Packet, RData};
+use dns_parser::{Builder, Packet, RData, ResponseCode};
 use dns_parser::rdata::a::Record;
 use dns_parser::{QueryType, QueryClass};
 
@@ -59,6 +59,9 @@ fn resolve(name: &str) -> Result<(), Box<Error>> {
             }
         }
     };
+    if pkt.header.response_code != ResponseCode::NoError {
+        return Err(pkt.header.response_code.into());
+    }
     if pkt.answers.len() == 0 {
         return Err("No records received".into());
     }

@@ -6,7 +6,7 @@ use std::net::UdpSocket;
 use std::process;
 
 
-use dns_parser::{Builder, Packet, RData};
+use dns_parser::{Builder, Packet, RData, ResponseCode};
 use dns_parser::rdata::a::Record;
 use dns_parser::{QueryType, QueryClass};
 
@@ -35,6 +35,9 @@ fn resolve(name: &str) -> Result<(), Box<Error>> {
     let mut buf = vec![0u8; 4096];
     sock.recv(&mut buf)?;
     let pkt = Packet::parse(&buf)?;
+    if pkt.header.response_code != ResponseCode::NoError {
+        return Err(pkt.header.response_code.into());
+    }
     if pkt.answers.len() == 0 {
         return Err("No records received".into());
     }

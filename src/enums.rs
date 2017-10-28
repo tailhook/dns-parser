@@ -138,17 +138,19 @@ pub enum Opcode {
     Reserved(u16),
 }
 
-/// The RCODE value according to RFC 1035
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-#[allow(missing_docs)] // names are from spec
-pub enum ResponseCode {
-    NoError,
-    FormatError,
-    ServerFailure,
-    NameError,
-    NotImplemented,
-    Refused,
-    Reserved(u8),
+quick_error! {
+    /// The RCODE value according to RFC 1035
+    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+    #[allow(missing_docs)] // names are from spec
+    pub enum ResponseCode {
+        NoError
+        FormatError
+        ServerFailure
+        NameError
+        NotImplemented
+        Refused
+        Reserved(code: u8)
+    }
 }
 
 impl From<u16> for Opcode {
