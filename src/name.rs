@@ -11,7 +11,7 @@ use {Error};
 ///
 /// This contains just a reference to a slice that contains the data.
 /// You may turn this into a string using `.to_string()`
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct Name<'a>{
     labels: &'a [u8],
     /// This is the original buffer size. The compressed names in original
@@ -122,6 +122,13 @@ impl<'a> fmt::Display for Name<'a> {
                 unreachable!();
             }
         }
+    }
+}
+impl<'a> fmt::Debug for Name<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_tuple("Name")
+        .field(&format!("{}", self))
+        .finish()
     }
 }
 
