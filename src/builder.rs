@@ -9,6 +9,7 @@ use {Opcode, ResponseCode, Header, QueryType, QueryClass};
 #[derive(Debug)]
 pub struct Builder {
     buf: Vec<u8>,
+    prefer_unicast: bool,
 }
 
 impl Builder {
@@ -36,7 +37,7 @@ impl Builder {
         };
         buf.extend([0u8; 12].iter());
         head.write(&mut buf[..12]);
-        Builder { buf: buf }
+        Builder { buf: buf, prefer_unicast: false }
     }
     /// Adds a question to the packet
     ///
@@ -54,7 +55,8 @@ impl Builder {
         }
         self.write_name(qname);
         self.buf.write_u16::<BigEndian>(qtype as u16).unwrap();
-        self.buf.write_u16::<BigEndian>(qclass as u16).unwrap();
+        let prefer_unicast: u16 = if self.prefer_unicast { 0x8000 } else { 0x0000 };
+        self.buf.write_u16::<BigEndian>(qclass as u16 | prefer_unicast).unwrap();
         let oldq = BigEndian::read_u16(&self.buf[4..6]);
         if oldq == 65535 {
             panic!("Too many questions");
@@ -70,6 +72,13 @@ impl Builder {
             self.buf.extend(part.as_bytes());
         }
         self.buf.push(0);
+    }
+    /// Sets the prefer_unicast flag on future question.
+    pub fn set_prefer_unicast(&mut self, prefer_unicast: bool)
+        -> &mut Builder
+    {
+        self.prefer_unicast = prefer_unicast;
+        self
     }
     /// Returns the final packet
     ///
@@ -108,6 +117,16 @@ mod test {
         bld.add_question("example.com", QT::A, QC::IN);
         let result = b"\x06%\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\
                       \x07example\x03com\x00\x00\x01\x00\x01";
+        assert_eq!(&bld.build().unwrap()[..], &result[..]);
+    }
+
+    #[test]
+    fn build_prefer_unicast_query() {
+        let mut bld = Builder::new_query(1573, true);
+        bld.set_prefer_unicast(true);
+        bld.add_question("example.com", QT::A, QC::IN);
+        let result = b"\x06%\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\
+                      \x07example\x03com\x00\x00\x01\x80\x01";
         assert_eq!(&bld.build().unwrap()[..], &result[..]);
     }
 
