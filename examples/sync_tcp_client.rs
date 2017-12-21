@@ -29,7 +29,7 @@ fn main() {
 fn resolve(name: &str) -> Result<(), Box<Error>> {
     let mut conn = TcpStream::connect("127.0.0.1:53")?;
     let mut builder = Builder::new_query(1, true);
-    builder.add_question(name, QueryType::A, QueryClass::IN);
+    builder.add_question(name, false, QueryType::A, QueryClass::IN);
     let packet = builder.build().map_err(|_| "truncated packet")?;
     let psize = [((packet.len() >> 8) & 0xFF) as u8,
                  (packet.len() & 0xFF) as u8];
