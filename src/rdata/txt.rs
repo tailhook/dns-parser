@@ -3,7 +3,7 @@ use std::str;
 use Error;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Record(pub String);
+pub struct Record(pub Vec<Vec<u8>>);
 
 impl<'a> super::Record<'a> for Record {
 
@@ -14,7 +14,7 @@ impl<'a> super::Record<'a> for Record {
         if len < 1 {
             return Err(Error::WrongRdataLength);
         }
-        let mut ret_string = String::new();
+        let mut ret_vec = Vec::new();
         let mut pos = 0;
         while pos < len {
             let rdlen = rdata[pos] as usize;
@@ -22,13 +22,10 @@ impl<'a> super::Record<'a> for Record {
             if len < rdlen + pos {
                 return Err(Error::WrongRdataLength);
             }
-            match str::from_utf8(&rdata[pos..(pos+rdlen)]) {
-                Ok(val) => ret_string.push_str(val),
-                Err(e) => return Err(Error::TxtDataIsNotUTF8(e)),
-            }
+            ret_vec.push(rdata[pos..(pos+rdlen)].to_owned());
             pos += rdlen;
         }
-        Ok(super::RData::TXT(Record(ret_string)))
+        Ok(super::RData::TXT(Record(ret_vec)))
     }
 }
 
@@ -80,7 +77,7 @@ mod test {
         assert_eq!(packet.answers[0].ttl, 86333);
         match packet.answers[0].data {
             RData::TXT(ref text) => {
-                assert_eq!(text.0, "v=spf1 redirect=_spf.facebook.com")
+                assert_eq!(text.0, ["v=spf1 redirect=_spf.".as_bytes(), "facebook.com".as_bytes()])
             }
             ref x => panic!("Wrong rdata {:?}", x),
         }
