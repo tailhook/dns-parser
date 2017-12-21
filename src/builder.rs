@@ -45,7 +45,7 @@ impl Builder {
     /// * Answers, nameservers or additional section has already been written
     /// * There are already 65535 questions in the buffer.
     /// * When name is invalid
-    pub fn add_question(&mut self, qname: &str,
+    pub fn add_question(&mut self, qname: &str, prefer_unicast: bool,
         qtype: QueryType, qclass: QueryClass)
         -> &mut Builder
     {
@@ -54,7 +54,8 @@ impl Builder {
         }
         self.write_name(qname);
         self.buf.write_u16::<BigEndian>(qtype as u16).unwrap();
-        self.buf.write_u16::<BigEndian>(qclass as u16).unwrap();
+        let prefer_unicast: u16 = if prefer_unicast { 0x8000 } else { 0x0000 };
+        self.buf.write_u16::<BigEndian>(qclass as u16 | prefer_unicast).unwrap();
         let oldq = BigEndian::read_u16(&self.buf[4..6]);
         if oldq == 65535 {
             panic!("Too many questions");
@@ -105,16 +106,25 @@ mod test {
     #[test]
     fn build_query() {
         let mut bld = Builder::new_query(1573, true);
-        bld.add_question("example.com", QT::A, QC::IN);
+        bld.add_question("example.com", false, QT::A, QC::IN);
         let result = b"\x06%\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\
                       \x07example\x03com\x00\x00\x01\x00\x01";
         assert_eq!(&bld.build().unwrap()[..], &result[..]);
     }
 
     #[test]
+    fn build_unicast_query() {
+        let mut bld = Builder::new_query(1573, true);
+        bld.add_question("example.com", true, QT::A, QC::IN);
+        let result = b"\x06%\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\
+                      \x07example\x03com\x00\x00\x01\x80\x01";
+        assert_eq!(&bld.build().unwrap()[..], &result[..]);
+    }
+
+    #[test]
     fn build_srv_query() {
         let mut bld = Builder::new_query(23513, true);
-        bld.add_question("_xmpp-server._tcp.gmail.com", QT::SRV, QC::IN);
+        bld.add_question("_xmpp-server._tcp.gmail.com", false, QT::SRV, QC::IN);
         let result = b"[\xd9\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\
             \x0c_xmpp-server\x04_tcp\x05gmail\x03com\x00\x00!\x00\x01";
         assert_eq!(&bld.build().unwrap()[..], &result[..]);
