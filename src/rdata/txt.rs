@@ -2,19 +2,50 @@ use std::str;
 
 use Error;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Record(pub String);
+#[derive(Debug, Clone)]
+pub struct Record<'a> {
+    bytes: &'a [u8],
+}
 
-impl<'a> super::Record<'a> for Record {
+#[derive(Debug)]
+pub struct RecordIter<'a> {
+    bytes: &'a [u8],
+}
+
+impl<'a> Iterator for RecordIter<'a> {
+    type Item = &'a [u8];
+    fn next(&mut self) -> Option<&'a [u8]> {
+        if self.bytes.len() >= 1 {
+            let len = self.bytes[0] as usize;
+            debug_assert!(self.bytes.len() >= len+1);
+            let (head, tail) = self.bytes[1..].split_at(len);
+            self.bytes = tail;
+            return Some(head);
+        }
+        return None;
+    }
+}
+
+impl<'a> Record<'a> {
+
+    // Returns iterator over text chunks
+    pub fn iter(&self) -> RecordIter<'a> {
+        RecordIter {
+            bytes: self.bytes,
+        }
+    }
+}
+
+impl<'a> super::Record<'a> for Record<'a> {
 
     const TYPE: isize = 16;
 
     fn parse(rdata: &'a [u8], _original: &'a [u8]) -> super::RDataResult<'a> {
+        // Just a quick check that record is valid
         let len = rdata.len();
         if len < 1 {
             return Err(Error::WrongRdataLength);
         }
-        let mut ret_string = String::new();
         let mut pos = 0;
         while pos < len {
             let rdlen = rdata[pos] as usize;
@@ -22,18 +53,18 @@ impl<'a> super::Record<'a> for Record {
             if len < rdlen + pos {
                 return Err(Error::WrongRdataLength);
             }
-            match str::from_utf8(&rdata[pos..(pos+rdlen)]) {
-                Ok(val) => ret_string.push_str(val),
-                Err(e) => return Err(Error::TxtDataIsNotUTF8(e)),
-            }
             pos += rdlen;
         }
-        Ok(super::RData::TXT(Record(ret_string)))
+        Ok(super::RData::TXT(Record {
+            bytes: rdata,
+        }))
     }
 }
 
 #[cfg(test)]
 mod test {
+
+    use std::str::from_utf8;
 
     use {Packet, Header};
     use Opcode::*;
@@ -80,7 +111,15 @@ mod test {
         assert_eq!(packet.answers[0].ttl, 86333);
         match packet.answers[0].data {
             RData::TXT(ref text) => {
-                assert_eq!(text.0, "v=spf1 redirect=_spf.facebook.com")
+                assert_eq!(text.iter()
+                    .map(|x| from_utf8(x).unwrap())
+                    .collect::<Vec<_>>()
+                    .concat(), "v=spf1 redirect=_spf.facebook.com");
+
+                // also assert boundaries are kept
+                assert_eq!(text.iter().collect::<Vec<_>>(),
+                    ["v=spf1 redirect=_spf.".as_bytes(),
+                     "facebook.com".as_bytes()]);
             }
             ref x => panic!("Wrong rdata {:?}", x),
         }
