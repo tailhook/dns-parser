@@ -43,6 +43,8 @@ pub enum Type {
     SRV = srv::Record::TYPE,
     /// EDNS0 options (RFC 6891)
     OPT = opt::Record::TYPE,
+    /// next secure record (RFC 4034, RFC 6762)
+    NSEC = nsec::Record::TYPE,
 }
 
 /// The QTYPE value according to RFC 1035
@@ -275,6 +277,7 @@ impl Type {
             aaaa::Record::TYPE      => Ok(AAAA),
             srv::Record::TYPE       => Ok(SRV),
             opt::Record::TYPE       => Ok(OPT),
+            nsec::Record::TYPE      => Ok(NSEC),
             x               => Err(Error::InvalidType(x as u16)),
         }
     }
