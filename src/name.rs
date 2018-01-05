@@ -1,6 +1,9 @@
 use std::fmt;
 use std::fmt::Write;
 use std::str::from_utf8;
+
+// Deprecated since rustc 1.23
+#[allow(unused_imports)]
 use std::ascii::AsciiExt;
 
 use byteorder::{BigEndian, ByteOrder};

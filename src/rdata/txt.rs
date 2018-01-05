@@ -1,5 +1,3 @@
-use std::str;
-
 use Error;
 
 #[derive(Debug, Clone)]
