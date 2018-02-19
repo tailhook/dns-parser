@@ -14,7 +14,7 @@ version = "0.7.1"
 authors = ["paul@colomiets.name"]
 
 [features]
-derive = ["serde", "serde_derive"]
+with-serde = ["serde", "serde_derive"]
 
 [dependencies]
 quick-error = "1.0.0"

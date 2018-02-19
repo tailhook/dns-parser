@@ -18,7 +18,7 @@
 extern crate byteorder;
 #[cfg(test)] #[macro_use] extern crate matches;
 #[macro_use(quick_error)] extern crate quick_error;
-#[cfg(feature = "derive")] #[macro_use] extern crate serde_derive;
+#[cfg(feature = "with-serde")] #[macro_use] extern crate serde_derive;
 
 mod enums;
 mod structs;
