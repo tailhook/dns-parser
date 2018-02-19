@@ -51,6 +51,7 @@ pub enum Type {
 ///
 /// All "EXPERIMENTAL" markers here are from the RFC
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
 pub enum QueryType {
     /// a host addresss
     A = a::Record::TYPE,
