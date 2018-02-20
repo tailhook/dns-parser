@@ -3,6 +3,13 @@ use Name;
 #[derive(Debug, Clone, Copy)]
 pub struct Record<'a>(pub Name<'a>);
 
+impl<'a> ToString for Record<'a> {
+    #[inline]
+    fn to_string(&self) -> String {
+        self.0.to_string()
+    }
+}
+
 impl<'a> super::Record<'a> for Record<'a> {
 
     const TYPE: isize = 2;
