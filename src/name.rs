@@ -3,7 +3,7 @@ use std::fmt::Write;
 use std::str::from_utf8;
 
 // Deprecated since rustc 1.23
-#[allow(unused_imports)]
+#[allow(unused_imports, deprecated)]
 use std::ascii::AsciiExt;
 
 use byteorder::{BigEndian, ByteOrder};
