@@ -1,7 +1,8 @@
 DNS Parser
 ==========
 
-*Status: beta*
+**Status: beta**
+
 [Documentation](https://docs.rs/dns-parser) |
 [Github](https://github.com/tailhook/dns-parser) |
 [Crate](https://crates.io/crates/dns-parser)

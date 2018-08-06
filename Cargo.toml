@@ -11,7 +11,7 @@ categories = ["parser-implementations"]
 homepage = "https://github.com/tailhook/dns-parser"
 documentation = "https://docs.rs/dns-parser"
 version = "0.7.1"
-authors = ["paul@colomiets.name"]
+authors = ["Paul Colomiets <paul@colomiets.name>"]
 
 [features]
 with-serde = ["serde", "serde_derive"]
@@ -25,7 +25,3 @@ serde_derive = { version = "1.0", optional = true }
 
 [dev-dependencies]
 matches = "0.1.2"
-
-[lib]
-name = "dns_parser"
-path = "src/lib.rs"
