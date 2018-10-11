@@ -55,7 +55,7 @@ pub enum RData<'a> {
     SRV(Srv<'a>),
     TXT(Txt<'a>),
     /// Anything that can't be parsed yet
-    Unknown(&'a [u8]),
+    Unknown(Type, &'a [u8]),
 }
 
 pub (crate) trait Record<'a> {
@@ -77,7 +77,25 @@ impl<'a> RData<'a> {
             Type::SOA       => Soa::parse(rdata, original),
             Type::SRV       => Srv::parse(rdata, original),
             Type::TXT       => Txt::parse(rdata, original),
-            _               => Ok(RData::Unknown(rdata)),
+            _               => Ok(RData::Unknown(typ, rdata)),
+        }
+    }
+
+    /// Returns packet type as enum
+    ///
+    /// Code can be converted to an integer `packet.type_code() as isize`
+    pub fn type_code(self) -> Type {
+        match self {
+            RData::A(..)         => Type::A,
+            RData::AAAA(..)      => Type::AAAA,
+            RData::CNAME(..)     => Type::CNAME,
+            RData::NS(..)        => Type::NS,
+            RData::MX(..)        => Type::MX,
+            RData::PTR(..)       => Type::PTR,
+            RData::SOA(..)       => Type::SOA,
+            RData::SRV(..)       => Type::SRV,
+            RData::TXT(..)       => Type::TXT,
+            RData::Unknown(t, _) => t,
         }
     }
 }
