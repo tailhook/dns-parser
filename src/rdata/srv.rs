@@ -9,9 +9,44 @@ pub struct Record<'a> {
     pub target: Name<'a>,
 }
 
+#[derive(Debug, Clone, Hash, Ord, PartialOrd, Eq, PartialEq)]
+pub struct RecordBuf {
+    pub priority: u16,
+    pub weight: u16,
+    pub port: u16,
+    pub target: String,
+}
+
+impl<'a> Record<'a> {
+    pub fn deep_clone(&self) -> RecordBuf {
+        RecordBuf{
+            priority: self.priority,
+            weight: self.weight,
+            port: self.port,
+            target: self.target.to_string(),
+        }
+    }
+}
+
+impl RecordBuf {
+    pub fn write_to<W: ::std::io::Write>(&self,mut w: W) -> ::std::io::Result<()> {
+        use byteorder::WriteBytesExt;
+        w.write_u16::<BigEndian>(self.priority)?;
+        w.write_u16::<BigEndian>(self.weight)?;
+        w.write_u16::<BigEndian>(self.port)?;
+        super::super::write_name_to(&self.target, &mut w)?;
+        Ok(())
+    }
+}
+
+impl<'a> super::RecordType for Record<'a> {
+    const TYPE: isize = 33;
+}
+impl super::RecordType for RecordBuf {
+    const TYPE: isize = 33;
+}
 impl<'a> super::Record<'a> for Record<'a> {
 
-    const TYPE: isize = 33;
 
     fn parse(rdata: &'a [u8], original: &'a [u8]) -> super::RDataResult<'a> {
         if rdata.len() < 7 {

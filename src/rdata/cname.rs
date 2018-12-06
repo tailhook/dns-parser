@@ -3,16 +3,36 @@ use Name;
 #[derive(Debug, Clone, Copy)]
 pub struct Record<'a>(pub Name<'a>);
 
+#[derive(Debug, Clone, Hash, Ord, PartialOrd, Eq, PartialEq)]
+pub struct RecordBuf(String);
+
+impl<'a> Record<'a> {
+    pub fn deep_clone(&self) -> RecordBuf {
+        RecordBuf(self.to_string())
+    }
+}
+
+impl RecordBuf {
+    pub fn write_to<W: ::std::io::Write>(&self,w: W) -> ::std::io::Result<()> {
+        super::super::write_name_to(&self.0, w)?;
+        Ok(())
+    }
+}
+
 impl<'a> ToString for Record<'a> {
     #[inline]
     fn to_string(&self) -> String {
         self.0.to_string()
     }
 }
-
+impl<'a> super::RecordType for Record<'a> {
+    const TYPE: isize = 5;
+}
+impl super::RecordType for RecordBuf {
+    const TYPE: isize = 5;
+}
 impl<'a> super::Record<'a> for Record<'a> {
 
-    const TYPE: isize = 5;
 
     fn parse(rdata: &'a [u8], original: &'a [u8]) -> super::RDataResult<'a> {
         let name = Name::scan(rdata, original)?;

@@ -3,10 +3,43 @@ use std::i32;
 use byteorder::{BigEndian, ByteOrder};
 
 use {Header, Packet, Error, Question, Name, QueryType, QueryClass};
+use {PacketBuf, QuestionBuf, ResourceRecordBuf, write_name_to};
 use {Type, Class, ResourceRecord, RData};
 use rdata::opt::Record as Opt;
 
 const OPT_RR_START: [u8; 3] = [0, 0, 41];
+
+impl PacketBuf {
+    /// Get DNS packet as bytes, writing it to specified writer
+    pub fn write_to<W: ::std::io::Write>(&self,mut w: W) -> ::std::io::Result<()> {
+        let mut header = self.header.clone();
+        assert!(self.questions.len() < 65536);
+        assert!(self.answers.len() < 65536);
+        assert!(self.nameservers.len() < 65536);
+        assert!(self.additional.len() < 65536);
+        
+        header.questions = self.questions.len() as u16;
+        header.answers = self.answers.len() as u16;
+        header.nameservers = self.nameservers.len() as u16;
+        header.additional = self.additional.len() as u16;
+
+        header.write_to(&mut w)?;
+
+        for q in &self.questions {
+            q.write_to(&mut w)?;
+        }
+        for a in &self.answers {
+            a.write_to(&mut w)?;
+        }
+        for ns in &self.nameservers {
+            ns.write_to(&mut w)?;
+        }
+        for ad in &self.additional {
+            ad.write_to(&mut w)?;
+        }
+        Ok(())
+    }
+}
 
 impl<'a> Packet<'a> {
     /// Parse a full DNS Packet and return a structure that has all the
@@ -68,6 +101,23 @@ impl<'a> Packet<'a> {
     }
 }
 
+impl QuestionBuf {
+    /// Get DNS packet as bytes, writing it to specified writer
+    pub fn write_to<W: ::std::io::Write>(&self,mut w: W) -> ::std::io::Result<()> {
+        use byteorder::WriteBytesExt;
+
+        let qtype = self.qtype as u16;
+        let mut qclass = self.qclass as u16;
+        if self.prefer_unicast { qclass |= 0x8000; }
+
+        write_name_to(&self.qname, &mut w)?;
+        w.write_u16::<BigEndian>(qtype)?;
+        w.write_u16::<BigEndian>(qclass)?;
+
+        Ok(())
+    }
+}
+
 fn parse_qclass_code(value: u16) -> Result<(bool, QueryClass), Error> {
     let prefer_unicast = value & 0x8000 == 0x8000;
     let qclass_code = value & 0x7FFF;
@@ -82,6 +132,32 @@ fn parse_class_code(value: u16) -> Result<(bool, Class), Error> {
 
     let cls = try!(Class::parse(class_code));
     Ok((is_unique, cls))
+}
+
+impl ResourceRecordBuf {
+    /// Get DNS packet as bytes, writing it to specified writer
+    pub fn write_to<W: ::std::io::Write>(&self,mut w: W) -> ::std::io::Result<()> {
+        use byteorder::WriteBytesExt;
+
+        let typ = self.data.type_code() as u16;
+        let mut clscode = self.cls as u16;
+        if self.multicast_unique { clscode |= 0x8000; }
+        let ttl = self.ttl;
+
+        write_name_to(&self.name, &mut w)?;
+        w.write_u16::<BigEndian>(typ)?;
+        w.write_u16::<BigEndian>(clscode)?;
+        w.write_u32::<BigEndian>(ttl)?;
+
+        let mut v = Vec::with_capacity(16);
+        self.data.write_to(&mut v)?;
+
+        assert!(v.len() < 65536);
+        w.write_u16::<BigEndian>(v.len() as u16)?;
+        w.write_all(&v)?;
+
+        Ok(())
+    }
 }
 
 // Generic function to parse answer, nameservers, and additional records.
