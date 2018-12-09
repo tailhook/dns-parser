@@ -4,6 +4,20 @@ use Error;
 pub struct Record<'a> {
     bytes: &'a [u8],
 }
+#[derive(Debug, Clone, Hash, Ord, PartialOrd, Eq, PartialEq)]
+pub struct RecordBuf(Vec<u8>);
+
+impl<'a> Record<'a> {
+    pub fn deep_clone(&self) -> RecordBuf {
+        RecordBuf(self.bytes.to_vec())
+    }
+}
+impl RecordBuf {
+    pub fn write_to<W: ::std::io::Write>(&self,mut w: W) -> ::std::io::Result<()> {
+        w.write_all(&self.0)?;
+        Ok(())
+    }
+}
 
 #[derive(Debug)]
 pub struct RecordIter<'a> {
@@ -34,9 +48,14 @@ impl<'a> Record<'a> {
     }
 }
 
+impl<'a> super::RecordType for Record<'a> {
+    const TYPE: isize = 16;
+}
+impl super::RecordType for RecordBuf {
+    const TYPE: isize = 16;
+}
 impl<'a> super::Record<'a> for Record<'a> {
 
-    const TYPE: isize = 16;
 
     fn parse(rdata: &'a [u8], _original: &'a [u8]) -> super::RDataResult<'a> {
         // Just a quick check that record is valid

@@ -12,10 +12,52 @@ pub struct Record<'a> {
     pub expire: u32,
     pub minimum_ttl: u32,
 }
+#[derive(Debug, Clone, Hash, Ord, PartialOrd, Eq, PartialEq)]
+pub struct RecordBuf {
+    pub primary_ns: String,
+    pub mailbox: String,
+    pub serial: u32,
+    pub refresh: u32,
+    pub retry: u32,
+    pub expire: u32,
+    pub minimum_ttl: u32,
+}
 
-impl<'a> super::Record<'a> for Record<'a> {
+impl<'a> Record<'a> {
+    pub fn deep_clone(&self) -> RecordBuf {
+        RecordBuf{
+            primary_ns: self.primary_ns.to_string(),
+            mailbox: self.mailbox.to_string(),
+            serial: self.serial,
+            refresh: self.refresh,
+            retry: self.retry,
+            expire: self.expire,
+            minimum_ttl: self.minimum_ttl,
+        }
+    }
+}
 
+impl RecordBuf {
+    pub fn write_to<W: ::std::io::Write>(&self,mut w: W) -> ::std::io::Result<()> {
+        use byteorder::WriteBytesExt;
+        super::super::write_name_to(&self.primary_ns, &mut w)?;
+        super::super::write_name_to(&self.mailbox, &mut w)?;
+        w.write_u32::<BigEndian>(self.serial)?;
+        w.write_u32::<BigEndian>(self.refresh)?;
+        w.write_u32::<BigEndian>(self.retry)?;
+        w.write_u32::<BigEndian>(self.expire)?;
+        w.write_u32::<BigEndian>(self.minimum_ttl)?;
+        Ok(())
+    }
+}
+
+impl<'a> super::RecordType for Record<'a> {
     const TYPE: isize = 6;
+}
+impl super::RecordType for RecordBuf {
+    const TYPE: isize = 6;
+}
+impl<'a> super::Record<'a> for Record<'a> {
 
     fn parse(rdata: &'a [u8], original: &'a [u8]) -> super::RDataResult<'a> {
         let mut pos = 0;

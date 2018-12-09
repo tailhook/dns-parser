@@ -22,6 +22,20 @@ pub struct Name<'a>{
     original: &'a [u8],
 }
 
+/// Turn name (represented as string) back into a part of a DNS packet
+/// no compression is implemented, the packet may be larger than original
+/// Each part between dots must be less than 128 bytes, lest panic.
+pub fn write_name_to<W: ::std::io::Write>(n: &str, mut w: W) -> ::std::io::Result<()> {
+    use byteorder::WriteBytesExt;
+    for l in n.split('.') {
+        assert!(l.len() < 128);
+        w.write_u8(l.len() as u8)?;
+        w.write_all(l.as_bytes())?;
+    }
+    w.write_u8(0)?;    
+    Ok(())
+}
+
 impl<'a> Name<'a> {
     /// Scan the data to get Name object
     ///

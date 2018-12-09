@@ -32,8 +32,9 @@ pub mod rdata;
 
 pub use enums::{Type, QueryType, Class, QueryClass, ResponseCode, Opcode};
 pub use structs::{Question, ResourceRecord, Packet};
-pub use name::{Name};
+pub use structs::{QuestionBuf, ResourceRecordBuf, PacketBuf};
+pub use name::{Name, write_name_to};
 pub use error::{Error};
 pub use header::{Header};
-pub use rdata::{RData};
+pub use rdata::{RData,RDataBuf};
 pub use builder::{Builder};

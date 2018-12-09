@@ -1,11 +1,10 @@
 use {Error};
-use rdata::Record;
 use rdata::*;
 
 /// The TYPE value according to RFC 1035
 ///
 /// All "EXPERIMENTAL" markers here are from the RFC
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum Type {
     /// a host addresss
     A = a::Record::TYPE,
@@ -50,7 +49,7 @@ pub enum Type {
 /// The QTYPE value according to RFC 1035
 ///
 /// All "EXPERIMENTAL" markers here are from the RFC
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
 pub enum QueryType {
     /// a host addresss
@@ -99,7 +98,7 @@ pub enum QueryType {
 
 
 /// The CLASS value according to RFC 1035
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum Class {
     /// the Internet
     IN = 1,
@@ -113,7 +112,7 @@ pub enum Class {
 }
 
 /// The QCLASS value according to RFC 1035
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum QueryClass {
     /// the Internet
     IN = 1,
@@ -129,7 +128,7 @@ pub enum QueryClass {
 }
 
 /// The OPCODE value according to RFC 1035
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum Opcode {
     /// Normal query
     StandardQuery,
@@ -143,7 +142,7 @@ pub enum Opcode {
 
 quick_error! {
     /// The RCODE value according to RFC 1035
-    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+    #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Ord, PartialOrd)]
     #[allow(missing_docs)] // names are from spec
     pub enum ResponseCode {
         NoError

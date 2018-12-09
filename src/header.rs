@@ -16,7 +16,7 @@ mod flag {
 }
 
 /// Represents parsed header of the packet
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Ord, PartialOrd)]
 #[allow(missing_docs)] // fields are from the spec I think
 pub struct Header {
     pub id: u16,
@@ -63,6 +63,13 @@ impl Header {
             additional: BigEndian::read_u16(&data[10..12]),
         };
         Ok(header)
+    }
+
+    /// Similar to `write`, doing the same
+    pub fn write_to<W: ::std::io::Write>(&self,mut w: W) -> ::std::io::Result<()> {
+        let mut buf = [0; 12];
+        self.write(&mut buf);
+        w.write_all(&buf)
     }
     /// Write a header to a buffer slice
     ///

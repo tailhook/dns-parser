@@ -7,9 +7,38 @@ pub struct Record<'a> {
     pub exchange: Name<'a>,
 }
 
+#[derive(Debug, Clone, Hash, Ord, PartialOrd, Eq, PartialEq)]
+pub struct RecordBuf {
+    pub preference: u16,
+    pub exchange: String,
+}
+
+impl<'a> Record<'a> {
+    pub fn deep_clone(&self) -> RecordBuf {
+        RecordBuf{
+            exchange: self.exchange.to_string(),
+            preference: self.preference,
+        }
+    }
+}
+
+impl RecordBuf {
+    pub fn write_to<W: ::std::io::Write>(&self,mut w: W) -> ::std::io::Result<()> {
+        use byteorder::WriteBytesExt;
+        w.write_u16::<BigEndian>(self.preference)?;
+        super::super::write_name_to(&self.exchange, w)?;
+        Ok(())
+    }
+}
+
+impl<'a> super::RecordType for Record<'a> {
+    const TYPE: isize = 15;
+}
+impl super::RecordType for RecordBuf {
+    const TYPE: isize = 15;
+}
 impl<'a> super::Record<'a> for Record<'a> {
 
-    const TYPE: isize = 15;
 
     fn parse(rdata: &'a [u8], original: &'a [u8]) -> super::RDataResult<'a> {
         if rdata.len() < 3 {

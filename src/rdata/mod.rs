@@ -40,6 +40,15 @@ pub use self::soa::Record as Soa;
 pub use self::srv::Record as Srv;
 pub use self::txt::Record as Txt;
 
+pub use self::cname::RecordBuf as CnameBuf;
+pub use self::mx::RecordBuf as MxBuf;
+pub use self::ns::RecordBuf as NsBuf;
+pub use self::opt::RecordBuf as OptBuf;
+pub use self::ptr::RecordBuf as PtrBuf;
+pub use self::soa::RecordBuf as SoaBuf;
+pub use self::srv::RecordBuf as SrvBuf;
+pub use self::txt::RecordBuf as TxtBuf;
+
 pub type RDataResult<'a> = Result<RData<'a>, Error>;
 
 /// The enumeration that represents known types of DNS resource records data
@@ -58,9 +67,81 @@ pub enum RData<'a> {
     Unknown(Type, &'a [u8]),
 }
 
-pub (crate) trait Record<'a> {
-    const TYPE: isize;
+/// Owned analogue of `RData`
+#[derive(Debug,Clone,Ord,Eq,Hash,PartialOrd,PartialEq)]
+pub enum RDataBuf {
+    A(A),
+    AAAA(Aaaa),
+    CNAME(CnameBuf),
+    MX(MxBuf),
+    NS(NsBuf),
+    PTR(PtrBuf),
+    SOA(SoaBuf),
+    SRV(SrvBuf),
+    TXT(TxtBuf),
+    /// Anything that can't be parsed yet
+    Unknown(Type, Vec<u8>),
+}
 
+
+impl<'a> RData<'a> {
+    pub fn deep_clone(&self) -> RDataBuf {
+        match self {
+            RData::A(x) => RDataBuf::A(*x),
+            RData::AAAA(x) => RDataBuf::AAAA(*x),
+            RData::CNAME(x) => RDataBuf::CNAME(x.deep_clone()),
+            RData::MX(x) => RDataBuf::MX(x.deep_clone()),
+            RData::NS(x) => RDataBuf::NS(x.deep_clone()),
+            RData::PTR(x) => RDataBuf::PTR(x.deep_clone()),
+            RData::SOA(x) => RDataBuf::SOA(x.deep_clone()),
+            RData::SRV(x) => RDataBuf::SRV(x.deep_clone()),
+            RData::TXT(x) => RDataBuf::TXT(x.deep_clone()),
+            RData::Unknown(t, b) => RDataBuf::Unknown(*t, b.to_vec()),
+        }
+    }
+}
+
+impl RDataBuf {
+    /// Serialize it as a part of DNS packet
+    pub fn write_to<W: ::std::io::Write>(&self,mut w: W) -> ::std::io::Result<()> {
+        match self {
+            RDataBuf::A(x) => x.write_to(w),
+            RDataBuf::AAAA(x) => x.write_to(w),
+            RDataBuf::CNAME(x) => x.write_to(w),
+            RDataBuf::MX(x) => x.write_to(w),
+            RDataBuf::NS(x) => x.write_to(w),
+            RDataBuf::PTR(x) => x.write_to(w),
+            RDataBuf::SOA(x) => x.write_to(w),
+            RDataBuf::SRV(x) => x.write_to(w),
+            RDataBuf::TXT(x) => x.write_to(w),
+            RDataBuf::Unknown(_t, b) => w.write_all(&b),
+        }
+    }
+    
+    /// Returns packet type as enum
+    ///
+    /// Code can be converted to an integer `packet.type_code() as isize`
+    pub fn type_code(&self) -> Type {
+        match *self {
+            RDataBuf::A(..)         => Type::A,
+            RDataBuf::AAAA(..)      => Type::AAAA,
+            RDataBuf::CNAME(..)     => Type::CNAME,
+            RDataBuf::NS(..)        => Type::NS,
+            RDataBuf::MX(..)        => Type::MX,
+            RDataBuf::PTR(..)       => Type::PTR,
+            RDataBuf::SOA(..)       => Type::SOA,
+            RDataBuf::SRV(..)       => Type::SRV,
+            RDataBuf::TXT(..)       => Type::TXT,
+            RDataBuf::Unknown(t, _) => t,
+        }
+    }
+}
+
+pub (crate) trait RecordType {
+    const TYPE: isize;
+}
+
+pub (crate) trait Record<'a> : RecordType {
     fn parse(rdata: &'a [u8], original: &'a [u8]) -> RDataResult<'a>;
 }
 
