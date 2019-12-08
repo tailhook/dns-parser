@@ -41,9 +41,7 @@ impl<'a> super::Record<'a> for Record<'a> {
     fn parse(rdata: &'a [u8], _original: &'a [u8]) -> super::RDataResult<'a> {
         // Just a quick check that record is valid
         let len = rdata.len();
-        if len < 1 {
-            return Err(Error::WrongRdataLength);
-        }
+
         let mut pos = 0;
         while pos < len {
             let rdlen = rdata[pos] as usize;
