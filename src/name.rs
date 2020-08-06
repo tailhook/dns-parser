@@ -1,6 +1,8 @@
 use std::fmt;
 use std::fmt::Write;
 use std::str::from_utf8;
+use std::slice::Iter;
+use std::iter::Peekable;
 
 // Deprecated since rustc 1.23
 #[allow(unused_imports, deprecated)]
@@ -93,6 +95,68 @@ impl<'a> Name<'a> {
     /// Number of bytes serialized name occupies
     pub fn byte_len(&self) -> usize {
         self.labels.len()
+    }
+    /// Returns an iterator over the bytes that make up this domain name
+    pub fn bytes(&self) -> NameBytes<'a> {
+        // Top 2 bits of a length octet indicate that it and the next byte are a pointer to a label
+        if self.labels.len() >= 2 && self.labels[0] >> 6 == 0b11 {
+            let pointer = (u16::from_be_bytes([self.labels[0], self.labels[1]])
+                & !0b1100_0000_0000_0000) as usize;
+            let len = self.original[pointer] as usize;
+            NameBytes {
+                original: self.original,
+                remaining_labels: &self.original[pointer + 1 + len..],
+                current_label: self.original[pointer + 1..pointer + 1 + len].iter().peekable(),
+            }
+        } else if self.labels.len() >= 1 {
+            let len = self.labels[0] as usize;
+            NameBytes {
+                original: self.original,
+                remaining_labels: &self.labels[1 + len..],
+                current_label: self.labels[1..1 + len].iter().peekable(),
+            }
+        } else {
+            // self.labels is empty
+            NameBytes {
+                original: self.original,
+                remaining_labels: self.labels,
+                current_label: self.labels.iter().peekable(),
+            }
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct NameBytes<'a> {
+    original: &'a [u8],
+    remaining_labels: &'a [u8],
+    current_label: Peekable<Iter<'a, u8>>,
+}
+
+impl Iterator for NameBytes<'_> {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<u8> {
+        // If we're iterating over a label, yield from that iterator
+        if let Some(x) = self.current_label.next() {
+            return Some(*x);
+        }
+        // If we're done with the current label and the next octet is 0 or no more bytes are left,
+        // we are done.
+        if self.remaining_labels.get(0) == Some(&0) {
+            return None;
+        }
+        // Else replace self with a new iterator
+        let name = Name {
+            labels: self.remaining_labels,
+            original: self.original,
+        };
+        *self = name.bytes();
+        if self.current_label.peek().is_none() {
+            None
+        } else {
+            Some(b'.')
+        }
     }
 }
 
