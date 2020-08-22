@@ -1,7 +1,15 @@
 use Name;
+use name::NameBytes;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Record<'a>(pub Name<'a>);
+
+impl<'a> Record<'a> {
+    #[inline]
+    pub fn bytes(&self) -> NameBytes<'_> {
+        self.0.bytes()
+    }
+}
 
 impl<'a> ToString for Record<'a> {
     #[inline]
