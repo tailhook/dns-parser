@@ -133,13 +133,13 @@ pub struct NameBytes<'a> {
     current_label: Peekable<Iter<'a, u8>>,
 }
 
-impl Iterator for NameBytes<'_> {
-    type Item = u8;
+impl<'a> Iterator for NameBytes<'a> {
+    type Item = &'a u8;
 
-    fn next(&mut self) -> Option<u8> {
+    fn next(&mut self) -> Option<&'a u8> {
         // If we're iterating over a label, yield from that iterator
         if let Some(x) = self.current_label.next() {
-            return Some(*x);
+            return Some(x);
         }
         // If we're done with the current label and the next octet is 0 or no more bytes are left,
         // we are done.
@@ -155,7 +155,7 @@ impl Iterator for NameBytes<'_> {
         if self.current_label.peek().is_none() {
             None
         } else {
-            Some(b'.')
+            Some(&b'.')
         }
     }
 }
