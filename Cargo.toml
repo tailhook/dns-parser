@@ -10,7 +10,7 @@ keywords = ["dns", "domain", "name", "parser"]
 categories = ["parser-implementations"]
 homepage = "https://github.com/tailhook/dns-parser"
 documentation = "https://docs.rs/dns-parser"
-version = "0.8.0"
+version = "0.9.0"
 authors = ["Paul Colomiets <paul@colomiets.name>"]
 
 [features]
