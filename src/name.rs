@@ -55,7 +55,7 @@ impl<'a> Name<'a> {
                 // Set value for return_pos which is the pos in the original
                 // data buffer that should be used to return after validating
                 // the offsetted labels.
-                if let None = return_pos {
+                if return_pos.is_none() {
                     return_pos = Some(pos);
                 }
 

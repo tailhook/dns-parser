@@ -13,9 +13,9 @@ pub struct RecordIter<'a> {
 impl<'a> Iterator for RecordIter<'a> {
     type Item = &'a [u8];
     fn next(&mut self) -> Option<&'a [u8]> {
-        if self.bytes.len() >= 1 {
+        if !self.bytes.is_empty() {
             let len = self.bytes[0] as usize;
-            debug_assert!(self.bytes.len() >= len+1);
+            debug_assert!(self.bytes.len() > len);
             let (head, tail) = self.bytes[1..].split_at(len);
             self.bytes = tail;
             return Some(head);

@@ -88,7 +88,7 @@ mod test {
                 "_xmpp-server._tcp.gmail.com");
             assert_eq!(packet.answers[i].cls, C::IN);
             assert_eq!(packet.answers[i].ttl, 900);
-            match *&packet.answers[i].data {
+            match packet.answers[i].data {
                 RData::SRV(Record { priority, weight, port, target }) => {
                     assert_eq!(priority, items[i].0);
                     assert_eq!(weight, items[i].1);
