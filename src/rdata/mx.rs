@@ -80,7 +80,7 @@ mod test {
             "gmail.com");
             assert_eq!(packet.answers[i].cls, C::IN);
             assert_eq!(packet.answers[i].ttl, 1148);
-            match *&packet.answers[i].data {
+            match packet.answers[i].data {
                 RData::MX( Record { preference, exchange }) => {
                     assert_eq!(preference, items[i].0);
                     assert_eq!(exchange.to_string(), (items[i].1).to_string());

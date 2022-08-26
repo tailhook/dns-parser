@@ -13,14 +13,14 @@ pub struct RecordIter<'a> {
 impl<'a> Iterator for RecordIter<'a> {
     type Item = &'a [u8];
     fn next(&mut self) -> Option<&'a [u8]> {
-        if self.bytes.len() >= 1 {
+        if !self.bytes.is_empty() {
             let len = self.bytes[0] as usize;
-            debug_assert!(self.bytes.len() >= len+1);
+            debug_assert!(self.bytes.len() > len);
             let (head, tail) = self.bytes[1..].split_at(len);
             self.bytes = tail;
             return Some(head);
         }
-        return None;
+        None
     }
 }
 
@@ -104,7 +104,7 @@ mod test {
         assert_eq!(&packet.questions[0].qname.to_string()[..], "facebook.com");
         assert_eq!(packet.answers.len(), 1);
         assert_eq!(&packet.answers[0].name.to_string()[..], "facebook.com");
-        assert_eq!(packet.answers[0].multicast_unique, false);
+        assert!(!packet.answers[0].multicast_unique);
         assert_eq!(packet.answers[0].cls, C::IN);
         assert_eq!(packet.answers[0].ttl, 86333);
         match packet.answers[0].data {

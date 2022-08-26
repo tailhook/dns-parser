@@ -26,7 +26,7 @@ fn main() {
     process::exit(code);
 }
 
-fn resolve(name: &str) -> Result<(), Box<Error>> {
+fn resolve(name: &str) -> Result<(), Box<dyn Error>> {
     let mut conn = TcpStream::connect("127.0.0.1:53")?;
     let mut builder = Builder::new_query(1, true);
     builder.add_question(name, false, QueryType::A, QueryClass::IN);
