@@ -85,9 +85,9 @@ impl<'a> Name<'a> {
             byte = parse_data[pos];
         }
         if let Some(return_pos) = return_pos {
-            return Ok(Name {labels: &data[..return_pos+2], original: original});
+            Ok(Name {labels: &data[..return_pos+2], original: original})
         } else {
-            return Ok(Name {labels: &data[..pos+1], original: original });
+            Ok(Name {labels: &data[..pos+1], original: original })
         }
     }
     /// Number of bytes serialized name occupies

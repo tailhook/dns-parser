@@ -20,7 +20,7 @@ impl<'a> Iterator for RecordIter<'a> {
             self.bytes = tail;
             return Some(head);
         }
-        return None;
+        None
     }
 }
 
