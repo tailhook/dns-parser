@@ -19,9 +19,9 @@ impl<'a> super::Record<'a> for Record<'a> {
 
     fn parse(rdata: &'a [u8], original: &'a [u8]) -> super::RDataResult<'a> {
         let mut pos = 0;
-        let primary_name_server = try!(Name::scan(rdata, original));
+        let primary_name_server = Name::scan(rdata, original)?;
         pos += primary_name_server.byte_len();
-        let mailbox = try!(Name::scan(&rdata[pos..], original));
+        let mailbox = Name::scan(&rdata[pos..], original)?;
         pos += mailbox.byte_len();
         if rdata[pos..].len() < 20 {
             return Err(Error::WrongRdataLength);
