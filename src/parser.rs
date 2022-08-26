@@ -31,9 +31,9 @@ impl<'a> Packet<'a> {
 
             questions.push(Question {
                 qname: name,
-                qtype: qtype,
-                prefer_unicast: prefer_unicast,
-                qclass: qclass,
+                qtype,
+                prefer_unicast,
+                qclass,
             });
         }
         let mut answers = Vec::with_capacity(header.answers as usize);
@@ -58,12 +58,12 @@ impl<'a> Packet<'a> {
             }
         }
         Ok(Packet {
-            header: header,
-            questions: questions,
-            answers: answers,
-            nameservers: nameservers,
-            additional: additional,
-            opt: opt,
+            header,
+            questions,
+            answers,
+            nameservers,
+            additional,
+            opt,
         })
     }
 }
@@ -113,11 +113,11 @@ fn parse_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<ResourceRecord
         &data[*offset..*offset+rdlen], data)?;
     *offset += rdlen;
     Ok(ResourceRecord {
-        name: name,
-        multicast_unique: multicast_unique,
-        cls: cls,
-        ttl: ttl,
-        data: data,
+        name,
+        multicast_unique,
+        cls,
+        ttl,
+        data,
     })
 }
 
@@ -151,11 +151,11 @@ fn parse_opt_record<'a>(data: &'a [u8], offset: &mut usize) -> Result<Opt<'a>, E
     *offset += rdlen;
 
     Ok(Opt {
-        udp: udp,
-        extrcode: extrcode,
-        version: version,
-        flags: flags,
-        data: data,
+        udp,
+        extrcode,
+        version,
+        flags,
+        data,
     })
 }
 

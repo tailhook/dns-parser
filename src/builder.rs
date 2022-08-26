@@ -19,7 +19,7 @@ impl Builder {
     pub fn new_query(id: u16, recursion: bool) -> Builder {
         let mut buf = Vec::with_capacity(512);
         let head = Header {
-            id: id,
+            id,
             query: true,
             opcode: Opcode::StandardQuery,
             authoritative: false,
@@ -36,7 +36,7 @@ impl Builder {
         };
         buf.extend([0u8; 12].iter());
         head.write(&mut buf[..12]);
-        Builder { buf: buf }
+        Builder { buf }
     }
     /// Adds a question to the packet
     ///

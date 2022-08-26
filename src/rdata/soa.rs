@@ -28,7 +28,7 @@ impl<'a> super::Record<'a> for Record<'a> {
         }
         let record = Record {
             primary_ns: primary_name_server,
-            mailbox: mailbox,
+            mailbox,
             serial: BigEndian::read_u32(&rdata[pos..(pos+4)]),
             refresh: BigEndian::read_u32(&rdata[(pos+4)..(pos+8)]),
             retry: BigEndian::read_u32(&rdata[(pos+8)..(pos+12)]),
