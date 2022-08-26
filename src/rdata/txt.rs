@@ -104,7 +104,7 @@ mod test {
         assert_eq!(&packet.questions[0].qname.to_string()[..], "facebook.com");
         assert_eq!(packet.answers.len(), 1);
         assert_eq!(&packet.answers[0].name.to_string()[..], "facebook.com");
-        assert_eq!(packet.answers[0].multicast_unique, false);
+        assert!(!packet.answers[0].multicast_unique);
         assert_eq!(packet.answers[0].cls, C::IN);
         assert_eq!(packet.answers[0].ttl, 86333);
         match packet.answers[0].data {

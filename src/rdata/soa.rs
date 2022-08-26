@@ -83,7 +83,7 @@ mod test {
           assert_eq!(packet.nameservers.len(), 1);
           assert_eq!(&packet.nameservers[0].name.to_string()[..], "youtube.com");
           assert_eq!(packet.nameservers[0].cls, C::IN);
-          assert_eq!(packet.nameservers[0].multicast_unique, false);
+          assert!(!packet.nameservers[0].multicast_unique);
           assert_eq!(packet.nameservers[0].ttl, 10800);
           match packet.nameservers[0].data {
               RData::SOA(ref soa_rec) => {

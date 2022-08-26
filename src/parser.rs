@@ -228,7 +228,7 @@ mod test {
         assert_eq!(&packet.questions[0].qname.to_string()[..], "example.com");
         assert_eq!(packet.answers.len(), 1);
         assert_eq!(&packet.answers[0].name.to_string()[..], "example.com");
-        assert_eq!(packet.answers[0].multicast_unique, false);
+        assert!(!packet.answers[0].multicast_unique);
         assert_eq!(packet.answers[0].cls, C::IN);
         assert_eq!(packet.answers[0].ttl, 1272);
         match packet.answers[0].data {
@@ -248,7 +248,7 @@ mod test {
         let packet = Packet::parse(response).unwrap();
 
         assert_eq!(packet.answers.len(), 1);
-        assert_eq!(packet.answers[0].multicast_unique, true);
+        assert!(packet.answers[0].multicast_unique);
         assert_eq!(packet.answers[0].cls, C::IN);
     }
 
@@ -397,7 +397,7 @@ mod test {
         assert_eq!(packet.questions.len(), 1);
         assert_eq!(packet.questions[0].qtype, QT::SRV);
         assert_eq!(packet.questions[0].qclass, QC::IN);
-        assert_eq!(packet.questions[0].prefer_unicast, false);
+        assert!(!packet.questions[0].prefer_unicast);
         assert_eq!(&packet.questions[0].qname.to_string()[..],
             "_xmpp-server._tcp.gmail.com");
         assert_eq!(packet.answers.len(), 0);
@@ -412,7 +412,7 @@ mod test {
         assert_eq!(packet.questions.len(), 1);
         assert_eq!(packet.questions[0].qtype, QT::A);
         assert_eq!(packet.questions[0].qclass, QC::IN);
-        assert_eq!(packet.questions[0].prefer_unicast, true);
+        assert!(packet.questions[0].prefer_unicast);
     }
 
     #[test]
