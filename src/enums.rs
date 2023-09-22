@@ -45,6 +45,8 @@ pub enum Type {
     OPT = opt::Record::TYPE,
     /// next secure record (RFC 4034, RFC 6762)
     NSEC = nsec::Record::TYPE,
+    /// HTTPS parameters request
+    HTTPS = https::Record::TYPE,
 }
 
 /// The QTYPE value according to RFC 1035
@@ -95,6 +97,9 @@ pub enum QueryType {
     MAILA = maila::Record::TYPE,
     /// A request for all records
     All = all::Record::TYPE,
+    /// A request for HTTPS records, see
+    /// https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-svcb-https-10
+    HTTPS = https::Record::TYPE,
 }
 
 
@@ -218,6 +223,7 @@ impl QueryType {
             ns::Record::TYPE        => Ok(NS),
             mf::Record::TYPE        => Ok(MF),
             cname::Record::TYPE     => Ok(CNAME),
+            https::Record::TYPE     => Ok(HTTPS),
             soa::Record::TYPE       => Ok(SOA),
             mb::Record::TYPE        => Ok(MB),
             mg::Record::TYPE        => Ok(MG),

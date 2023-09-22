@@ -8,6 +8,7 @@ pub mod all;
 pub mod axfr;
 pub mod cname;
 pub mod hinfo;
+pub mod https;
 pub mod maila;
 pub mod mailb;
 pub mod mb;
@@ -31,6 +32,7 @@ use {Type, Error};
 pub use self::a::Record as A;
 pub use self::aaaa::Record as Aaaa;
 pub use self::cname::Record as Cname;
+pub use self::https::Record as Https;
 pub use self::mx::Record as Mx;
 pub use self::ns::Record as Ns;
 pub use self::nsec::Record as Nsec;
@@ -48,6 +50,7 @@ pub enum RData<'a> {
     A(A),
     AAAA(Aaaa),
     CNAME(Cname<'a>),
+    HTTPS(Https<'a>),
     MX(Mx<'a>),
     NS(Ns<'a>),
     PTR(Ptr<'a>),
@@ -89,6 +92,7 @@ impl<'a> RData<'a> {
             RData::A(..)         => Type::A,
             RData::AAAA(..)      => Type::AAAA,
             RData::CNAME(..)     => Type::CNAME,
+            RData::HTTPS(..)     => Type::HTTPS,
             RData::NS(..)        => Type::NS,
             RData::MX(..)        => Type::MX,
             RData::PTR(..)       => Type::PTR,
