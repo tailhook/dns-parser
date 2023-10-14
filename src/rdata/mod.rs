@@ -74,6 +74,7 @@ impl<'a> RData<'a> {
             Type::A         => A::parse(rdata, original),
             Type::AAAA      => Aaaa::parse(rdata, original),
             Type::CNAME     => Cname::parse(rdata, original),
+            Type::HTTPS     => Https::parse(rdata, original),
             Type::NS        => Ns::parse(rdata, original),
             Type::MX        => Mx::parse(rdata, original),
             Type::PTR       => Ptr::parse(rdata, original),

@@ -270,6 +270,7 @@ impl Type {
             ns::Record::TYPE        => Ok(NS),
             mf::Record::TYPE        => Ok(MF),
             cname::Record::TYPE     => Ok(CNAME),
+            https::Record::TYPE     => Ok(HTTPS),
             soa::Record::TYPE       => Ok(SOA),
             mb::Record::TYPE        => Ok(MB),
             mg::Record::TYPE        => Ok(MG),
