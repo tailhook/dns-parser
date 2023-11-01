@@ -24,6 +24,7 @@ pub mod opt;
 pub mod ptr;
 pub mod soa;
 pub mod srv;
+pub mod svcb;
 pub mod txt;
 pub mod wks;
 
@@ -40,6 +41,7 @@ pub use self::opt::Record as Opt;
 pub use self::ptr::Record as Ptr;
 pub use self::soa::Record as Soa;
 pub use self::srv::Record as Srv;
+pub use self::svcb::Record as Svcb;
 pub use self::txt::Record as Txt;
 
 pub type RDataResult<'a> = Result<RData<'a>, Error>;
@@ -56,6 +58,7 @@ pub enum RData<'a> {
     PTR(Ptr<'a>),
     SOA(Soa<'a>),
     SRV(Srv<'a>),
+    SVCB(Svcb<'a>),
     TXT(Txt<'a>),
     /// Anything that can't be parsed yet
     Unknown(Type, &'a [u8]),
@@ -80,6 +83,7 @@ impl<'a> RData<'a> {
             Type::PTR       => Ptr::parse(rdata, original),
             Type::SOA       => Soa::parse(rdata, original),
             Type::SRV       => Srv::parse(rdata, original),
+            Type::SVCB      => Svcb::parse(rdata, original),
             Type::TXT       => Txt::parse(rdata, original),
             _               => Ok(RData::Unknown(typ, rdata)),
         }
@@ -99,6 +103,7 @@ impl<'a> RData<'a> {
             RData::PTR(..)       => Type::PTR,
             RData::SOA(..)       => Type::SOA,
             RData::SRV(..)       => Type::SRV,
+            RData::SVCB(..)      => Type::SVCB,
             RData::TXT(..)       => Type::TXT,
             RData::Unknown(t, _) => t,
         }

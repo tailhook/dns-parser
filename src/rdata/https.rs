@@ -1,5 +1,7 @@
 use Error;
 
+// see https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-svcb-https-10
+
 #[derive(Debug, Clone, Copy)]
 pub struct Record<'a> {
     // TODO: we are not actually parsing the contents of the HTTPS RR for now

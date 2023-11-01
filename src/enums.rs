@@ -47,6 +47,8 @@ pub enum Type {
     NSEC = nsec::Record::TYPE,
     /// HTTPS parameters request
     HTTPS = https::Record::TYPE,
+    /// SVCB parameters request
+    SVCB = svcb::Record::TYPE,
 }
 
 /// The QTYPE value according to RFC 1035
@@ -100,6 +102,9 @@ pub enum QueryType {
     /// A request for HTTPS records, see
     /// https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-svcb-https-10
     HTTPS = https::Record::TYPE,
+    /// A request for SVCB records, see
+    /// https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-svcb-https-10
+    SVCB = svcb::Record::TYPE,
 }
 
 
@@ -224,6 +229,7 @@ impl QueryType {
             mf::Record::TYPE        => Ok(MF),
             cname::Record::TYPE     => Ok(CNAME),
             https::Record::TYPE     => Ok(HTTPS),
+            svcb::Record::TYPE      => Ok(SVCB),
             soa::Record::TYPE       => Ok(SOA),
             mb::Record::TYPE        => Ok(MB),
             mg::Record::TYPE        => Ok(MG),
@@ -271,6 +277,7 @@ impl Type {
             mf::Record::TYPE        => Ok(MF),
             cname::Record::TYPE     => Ok(CNAME),
             https::Record::TYPE     => Ok(HTTPS),
+            svcb::Record::TYPE      => Ok(SVCB),
             soa::Record::TYPE       => Ok(SOA),
             mb::Record::TYPE        => Ok(MB),
             mg::Record::TYPE        => Ok(MG),
